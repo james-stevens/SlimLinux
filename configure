@@ -48,11 +48,11 @@ while test "${thisoverlay}" = "UNKNOWN"
 	do
 		echo "Select an overlay -> Current Overlays: ${overlays}"; echo ""
 
-		ls -d */rootfs | awk -F/ '/^overlay_/ { print substr($1,index($1,"_")+1) }'
+		ls overlays
 
 		echo ""; echo -n "Add overlay [blank=done] :"
 		read thisoverlay
-		if test -d "overlay_${thisoverlay}"
+		if test -d "overlay/${thisoverlay}"
 			then
 				overlays="${overlays}${sep}${thisoverlay}"; sep=" ";
 				thisoverlay="UNKNOWN"
