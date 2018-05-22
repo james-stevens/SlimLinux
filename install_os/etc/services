@@ -1,0 +1,5 @@
+tcpmux		1/tcp		# TCP port service multiplexer
+echo		7/tcp
+echo		7/udp
+www		80/tcp		http	# WorldWideWeb HTTP
+www		80/udp			# HyperText Transfer Protocol

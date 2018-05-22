@@ -1,0 +1,389 @@
+#! /bin/sh
+
+setconsole /dev/tty1
+tmp=/tmp/output.txt
+cfgfs=/cdrom/config.tgz
+datafs=/cdrom/data.txz
+
+export TERM=linux
+stty sane
+
+title=" SlimLinux Install CD "
+
+
+function curtop() { echo -en '\e[H'; }
+function clrscr() { echo -en '\e[H\e[J'; }
+
+function showmsg()
+{
+	dialog --title "${title}" --infobox "\n          ${1}" 9 65
+	curtop
+	echo -en '\e[H'
+}
+
+
+function end_it()
+{
+	{
+	cd /
+	umount /mnt
+	umount /u
+	umount /cdrom
+	} >/dev/null 2>&1
+
+	if test "${cdrom}"; then eject /dev/${cdrom}; fi
+	/sbin/poweroff -f ; exit 0 ;
+}
+
+
+showmsg "Looking for a Hard Drive"
+
+sleep 0.25
+
+if grep -q ' hda ' /proc/diskstats
+	then
+		disk="/dev/hda"
+	fi
+if grep -q ' sda ' /proc/diskstats
+	then
+		disk="/dev/sda"
+	fi
+
+
+if ! dd if=${disk} of=/dev/null bs=1k count=5 >/dev/null 2>&1
+	then
+		dialog --title "${title}" \
+			--msgbox "\n           ERROR: Could not find a hard disk\n" 9 65
+		end_it
+	fi
+
+
+showmsg "Checking for a support Ethernet card"
+sleep 0.25
+
+
+if ! grep -q 'eth0:' /proc/net/dev
+	then
+		dialog --title "${title}" \
+			--msgbox "\nERROR: Failed to find supported ethernet card\n" 9 65
+		end_it
+	fi
+
+
+x=1
+max=50
+while ! grep -q " sr0 " /proc/diskstats
+do
+	showmsg "Looking for a CD Drive"
+	sleep 1
+	x=$[$x+1]
+	if test "${x}" -gt ${max}; then break; fi
+done
+
+cdrom=$(awk '/drive name/ { print $3 }' /proc/sys/dev/cdrom/info)
+
+
+if ! grep -q " sr0 " /proc/diskstats
+	then
+		dialog --title "${title}" \
+			--msgbox "\nERROR: Could not find a CD-ROM Drive\n" 9 65
+		end_it
+	fi
+
+
+showmsg "Checking the CD"
+sleep 0.25
+
+
+cdrom=sr0
+dd if=/dev/${cdrom} of=/dev/null bs=1k count=200 >/dev/null 2>&1
+mount -nrt iso9660 /dev/${cdrom} /cdrom
+ls -l /cdrom/* > /dev/null 2>&1
+
+
+max=60
+x=1
+while ! grep -q '/cdrom' /proc/mounts
+do
+	{
+	awk '{ if ($1==11) print $3 }' /proc/diskstats
+	sfdisk -g | awk -F: '/^\/dev\/sd[a-z]1: / { print substr($1,6) }'
+	} | while read cdrom
+	do
+		showmdg "Checking the CD (${cdrom})"
+
+		dd if=/dev/${cdrom} of=/dev/null bs=1k count=200 >/dev/null 2>&1
+		mount -nrt iso9660 /dev/${cdrom} /cdrom
+		ls -l /cdrom/* > /dev/null 2>&1
+
+		if grep -q '/cdrom' /proc/mounts; then break; fi
+
+		sleep 1
+	done
+	if grep -q '/cdrom' /proc/mounts; then break; fi
+
+	x=$[$x+1]
+	if test "${x}" -gt ${max}; then break; fi
+done
+
+cdrom=$(awk '/\/cdrom/ { print substr($1,6) }' /proc/mounts)
+
+
+while ! grep -q /cdrom /proc/mounts
+	do
+		dialog --title "${title}" \
+			--msgbox "\nERROR: Failed to mount CD\n" 9 65
+		end_it
+	done
+
+
+
+showmsg "Checking the Software Image File Exists"
+sleep 0.25
+
+image=/cdrom/rootfs.txz
+
+if test ! -f ${image}
+	then
+		dialog --title "${title}" \
+			--msgbox "\nERROR: Failed to find image file on CD\n" 9 65
+		end_it
+	fi
+
+
+showmsg "Checking all the files on the CD"
+
+cd /cdrom
+if ! md5sum -c chk.md5 > /dev/null 2>&1
+	then
+		dialog --title "${title}" \
+			--msgbox "\nERROR: CD files failed MD5 checksum test\n" 9 65
+		end_it
+	fi
+
+cd /
+
+
+
+if sfdisk -l ${disk} | grep -qE "^${disk}[1-4]"
+	then
+		showmsg ""
+		sleep 0.1
+		clrscr
+
+		while test "${instype}" = ""
+		do
+			dialog --title "${title}" --menu \
+				'WARNING: This installer will RE-FORMAT your hard disk - Are you sure' 12 70 3 \
+				Stop 'Abort install' \
+				Continue 'Format my disk' \
+				Update 'Update ROOTFS only' 2>${tmp}
+
+			read instype < ${tmp}; rm -f ${tmp}
+
+			if test "${instype}" = "Stop"
+				then 
+					clrscr
+					/bin/poweroff -f
+					exit 0
+				fi
+		done
+	else
+		instype="Continue"
+	fi
+
+
+
+{
+umount ${disk}1
+umount ${disk}2
+umount ${disk}3
+umount ${disk}4
+umount /u
+umount /mnt
+} >/dev/null 2>&1
+
+
+if test "${instype}" = "Continue" -a ! -f ${cfgfs}
+	then
+		dialog --title "${title}" --menu "Assign IPv4 Address by ..." 10 70 2 \
+			Static "Static IPv4 Address" DHCP "Dynamic IPv4 Address" 2>${tmp}
+		read addrget < ${tmp}; rm -f ${tmp}
+
+		if test "${addrget}" = "Static"
+			then
+				ipexp='^[1-2]?[0-9]?[0-9].[1-2]?[0-9]?[0-9].[1-2]?[0-9]?[0-9].[1-2]?[0-9]?[0-9]$'
+				ipaddr="X"; netmask="X"; gateway="X"
+
+				while ! regexp "${ipexp}" "${ipaddr}"
+				do
+					dialog --title "${title}" --inputbox "Enter this servers IP Address " 10 70 "" 2>${tmp}
+					read ipaddr < ${tmp}; rm -f ${tmp}
+				done
+
+				while ! regexp "${ipexp}" "${netmask}"
+				do
+					dialog --title "${title}" --menu "Select this servers subnet mask " 15 70 7 \
+						255.255.255.252 "4 addresses"   255.255.255.248 "8 addresses" \
+						255.255.255.240 "16 addresses"  255.255.255.224 "32 addresses" \
+						255.255.255.192 "64 addresses"  255.255.255.128 "128 addresses" \
+						255.255.255.0 "256 addresses"   255.255.254.0 "512 addresses" \
+						255.255.252.0 "1024 addresses"  255.255.248.0 "2048 addresses" \
+						255.255.240.0 "4096 addresses"  255.255.224.0 "8192 addresses" \
+						255.255.192.0 "16384 addresses" 255.255.128.0 "32768 addresses" \
+						255.255.0.0 "65536 addresses" 2>${tmp}
+					read netmask < ${tmp}; rm -f ${tmp}
+				done
+
+				while ! regexp "${ipexp}" "${gateway}"
+				do
+					dialog --title "${title}" --menu "Select this servers default route / gateway " 15 70 7 $(all_addrs ${ipaddr} ${netmask}) 2>${tmp}
+					read gateway < ${tmp}; rm -f ${tmp}
+				done
+			fi
+	fi
+
+
+
+if test "${instype}" = "Continue"
+	then
+		showmsg "Partitioning the Hard Disk"
+
+		if test -f /cdrom/partition.cfg
+			then
+				cat /cdrom/partition.cfg | sfdisk -q ${disk} >/dev/tty4 2>&1
+			else
+				{
+				echo "label: gpt"
+				echo ",512000,L,*"
+				echo ",21000,L"
+				echo ",16700000,S"
+				echo ",,L"
+				} | sfdisk -q ${disk} >/dev/tty4 2>&1
+			fi
+		showmsg "Formatting the Disk"
+	else
+		showmsg "Re-Installing the ROOTFS"
+	fi
+
+
+
+{
+mke2fs -m 0 -N 40 -q ${disk}1 >/dev/null 2>&1
+mkswap ${disk}3
+} >/dev/tty4 2>&1
+
+showmsg "Installing the Operating System"
+
+{
+mount -t ext2 -no nodiratime,noatime ${disk}1 /mnt
+cd /mnt
+
+cd /mnt
+tar xf ${image}
+cd /
+mount -t devtmpfs /mnt/dev /mnt/dev
+mount -t proc /mnt/proc /mnt/proc
+
+mount -no remount,sync /mnt
+
+mkdir -p /mnt/opt/config
+mkdir -p /mnt/opt/data
+
+sync
+chroot /mnt lilo
+sync
+chroot /mnt ldconfig
+sync
+
+mount -rno remount /mnt
+
+} >/dev/tty4 2>&1
+
+
+{
+sync
+
+if test "${instype}" = "Continue"
+	then
+		mke2fs -m 0 -N 20 -q ${disk}2 >/dev/null 2>&1
+		mount -t ext2 -no nodiratime,noatime,sync ${disk}2 /mnt/opt/config
+
+		cd /mnt/opt/config
+		rm -rf lost+found
+		mkdir lost+found
+
+		if test -f ${cfgfs}
+			then
+				tar xf ${cfgfs}
+			else
+				{
+				cat /mnt/etc/base_config/* 
+				echo ""
+				cat /cdrom/install.cfg
+				echo ""
+
+				if test "${addrget}" = "Static"
+					then
+						echo "static4IP=${ipaddr}"
+						echo "static4Mask=${netmask}"
+						echo "static4GW=${gateway}"
+					fi
+
+				} > system.cfg
+			fi
+	fi
+
+} >/dev/tty4 2>&1
+
+if test "${instype}" = "Continue"
+	then
+		showmsg "Formatting the data partition"
+		mkfs.reiser ${disk}4
+		if test -f ${datafs}
+			then
+				showmsg "Installing the Data"
+				{
+				mount -t reiserfs ${disk}4 /mnt/opt/data
+				cd /mnt/opt/data
+				tar xf ${datafs}
+				sync
+				umount /mnt/opt/data
+				} > /dev/tty4 2>&1
+			fi
+	fi
+
+showmsg "Installation Complete"
+
+{
+sync
+
+cd /
+umount /mnt/opt/data
+umount /mnt/opt/config
+umount /mnt/proc
+umount /mnt/dev
+umount /mnt
+umount /cdrom
+
+} >/dev/tty4 2>&1
+
+
+sync
+hdparm -f ${disk}
+sleep 0.25
+sync
+hdparm -f ${disk}
+
+
+
+
+sync
+
+eject /dev/${cdrom}
+
+dialog --title "${title}" \
+    --msgbox "\n     Please remove the CD and Press [Enter] to Re-Boot\n" 9 65
+
+sync; sleep 1; sync
+clrscr; reboot -f

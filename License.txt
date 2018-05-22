@@ -1,0 +1,30 @@
+SlimLinux is released as open source under the license GPLv3.
+
+You are free to do whatever you like with the software, but all 
+modifications, enhancements, bug fixes to any part of the works 
+must be made public as well as any additional features / binary 
+bases / overlays that depend on, or make use of, the open source
+code.
+
+All projects that are based on SlimLinux, or use any parts of 
+SlimLinux, must be fully open source and made free under GPLv3.
+
+If you wish to use SlimLinux as part of a proprietary product, and
+so do not wish to publish the source code to that product, other 
+license terms are available. Closed source projects based on 
+SlimLinux are not permitted under the terms of this open source 
+license.
+
+Developers that submit changes, updates, enhancements etc, agree
+that their code will always be released as open source under 
+GPLv3, as well as being included in alternative closed source 
+license terms offered to third parties.
+
+We totally respect all developers who do not wish to agree to 
+this but, due to pre-existing agreements, we can not integrate 
+their code in the master branch. 
+
+This is commonly referred to "selling exceptions" and there 
+are mixed feelings about it in the open source community. 
+However, where it enables businesses to sustain open source 
+projects it will probably continue to be part of the industry.

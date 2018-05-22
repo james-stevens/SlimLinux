@@ -1,0 +1,5 @@
+/dev/hda3       /        ext2        defaults   1   1
+/dev/hda1       /mnt        ext2        ro   1   1
+/dev/hda4       /home/partition        ext2        defaults   1   1
+/dev/hda2      swap	swap	-	-	-
+none             /proc    proc        defaults   1   1
