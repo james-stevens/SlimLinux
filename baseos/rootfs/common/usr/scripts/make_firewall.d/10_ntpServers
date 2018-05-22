@@ -1,0 +1,16 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+
+if test "${ntpServers}"
+	then
+        /usr/scripts/by_addr_type ${ipv} ${ntpServers} | while read adr msk typ all
+			do
+				echo "-A INPUT -s ${all} -p tcp --sport 123 -j ACCEPT"
+				echo "-A INPUT -s ${all} -p udp --sport 123 -j ACCEPT"
+				echo "-A OUTPUT -d ${all} -p tcp --dport 123 -j ACCEPT"
+				echo "-A OUTPUT -d ${all} -p udp --dport 123 -j ACCEPT"
+			done
+	fi

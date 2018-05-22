@@ -1,0 +1,19 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+. /usr/scripts/opts
+
+tmp=/ram/tmp/make_inittab_$$_$RANDOM
+
+for file in /usr/scripts/make_inittab.d/*; do . ${file}; done > ${tmp}
+
+dst="/ram/inittab"
+if ! cmp -s ${tmp} ${dst}
+	then
+		mv ${tmp} ${dst}
+		killall -HUP init
+	fi
+
+rm -f ${tmp}

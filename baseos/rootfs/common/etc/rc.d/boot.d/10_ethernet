@@ -1,0 +1,68 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+
+if test "${static4IP}" -a "${static4Mask}"
+	then
+		ifconfig eth0 ${static4IP} netmask ${static4Mask}
+		if test "${static4GW}"
+			then
+				ip -4 route add default via ${static4GW}
+			fi
+	fi
+	
+if test "${static6IP}" -a "${static6Mask}"
+	then
+		ip addr add ${static6IP}/${static6Mask} dev eth0
+		if test "${static6GW}"
+			then
+				ip -6 route add default via ${static6GW}
+			fi
+	fi
+
+echo 10000 > /proc/sys/net/ipv4/tcp_max_syn_backlog
+echo 10000 > /proc/sys/net/core/somaxconn
+echo 5 > /proc/sys/net/ipv4/tcp_fin_timeout
+
+# helps with MTU issues
+echo 1 > /proc/sys/net/ipv4/tcp_mtu_probing
+echo 1280 > /proc/sys/net/ipv4/tcp_base_mss
+
+/usr/scripts/make_firewall
+
+
+if test "${staticResolvers}"
+	then
+		svrs="${staticResolvers}"
+	else
+		svrs="8.8.8.8 8.8.4.4 208.67.220.220 208.67.222.222"
+	fi
+	
+{
+for svr in ${svrs}
+do
+	echo "nameserver ${svr}"
+done
+} > /ram/etc/resolv.conf
+
+{
+echo "127.0.0.1 localhost"
+if test "${static4IP}"
+	then
+		echo "${static4IP} ${serverHostname}"
+	fi
+} > /ram/etc/hosts
+
+awk '/^route=/ {
+	x=substr($0,index($0,"=")+1);
+	gsub("\"","",x);
+	n=split(x,a," ");
+	if (index(a[1],":")>0) ip="-6"; else ip="-4";
+	print ip,a[1],a[2] 
+	}' ${syscfg} | while read ip sub gw
+	do
+		ip ${ip} route add ${sub} via ${gw}
+	done
+

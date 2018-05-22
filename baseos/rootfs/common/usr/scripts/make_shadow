@@ -1,0 +1,65 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+. /usr/scripts/opts
+
+mkdir -p /ram/etc/
+chmod 755 /ram/etc
+
+echo "root:${rootPassword}:16750:0:::::" > /ram/etc/shadow
+
+chmod 400 /ram/etc/shadow
+
+echo 'root:x:0:0::/ram/root:/bin/sh
+sshd:x:33:33::/tmp:/bin/false
+nobody:x:9999:9999::/tmp:/bin/false' > /ram/etc/passwd
+
+chmod 444 /ram/etc/passwd
+
+echo 'root:x:0:root
+nobody:x:9999:nobody' >  /ram/etc/group
+chmod 444 /ram/etc/group
+
+
+awk 'BEGIN { uid=101; } 
+	/^plainUser=/ {
+		x=substr($0,index($0,"=")+1);
+		gsub("\"","",x);
+		n=split(x,a," ");
+
+		user=a[1]; grp="100";
+
+		if (a[3]=="") id=uid++; else id=a[n]
+		
+		i=index(user,":");
+		if (i>0) {
+			user=substr(user,1,i-1);
+			grp=id; 
+			printf "%s:x:%s:%s\n",substr(a[1],i+1),id,user >> "/ram/etc/group"
+			}
+		else
+			{
+			all = all _ sep _ user
+			sep=","
+			}
+
+		home="/ram/home/"  _ user; shell="/sbin/sh";
+		if (a[2]=="-") 
+			{ home="/tmp"; shell="/sbin/false"; }
+		else
+			printf "%s:%s:16750:0:::::\n",user,a[2] >> "/ram/etc/shadow"
+
+		printf "%s:x:%s:%s::%s:%s\n",user,id,grp,home,shell >> "/ram/etc/passwd"
+
+		print user,grp,id,home
+
+	} END {
+		if (all!="") printf "users:x:100:%s\n",all >> "/ram/etc/group"
+	}' ${syscfg} | while read user grp uid home
+	do
+		mkdir -m 700 -p "${home}"
+		chown ${uid}: "${home}"
+		/usr/scripts/make_auth_keys ${user} ${uid} ${grp}
+	done

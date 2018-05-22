@@ -1,0 +1,28 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+syscfg="/opt/config/system.cfg"
+
+. ${syscfg}
+
+if test -z "${static4IP}" -a -f /ram/dhcp/eth0
+	then
+		. /ram/dhcp/eth0
+		my4ip="${eth0_ip}"
+		my4mask="${eth0_subnet}"
+		my4gw="${eth0_router}"
+	else
+		my4ip="${static4IP}"
+		my4mask="${static4Mask}"
+		my4gw="${static4GW}"
+	fi
+	
+if test "${my4ip}" -a "${my4mask}"
+	then
+		tmp=/tmp/opts_$$_$RANDOM
+		ipcalc -pbnm ${my4ip} ${my4mask} | awk '{ print "my4" _ tolower($0) }' > ${tmp}
+		. ${tmp}
+		rm -f ${tmp}
+	fi

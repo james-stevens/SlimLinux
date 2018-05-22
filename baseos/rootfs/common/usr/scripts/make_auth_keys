@@ -1,0 +1,39 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+. /usr/scripts/opts
+
+dst="/ram/root/.ssh/authorized_keys"
+
+if test -z "$1"
+	then
+		awk '/^auth_keys=/||/^root_keys=/ {
+			x=substr($0,index($0,"=")+1);
+			gsub("\"","",x);
+			print x                 
+			}' ${syscfg} > ${dst}
+			
+		chmod 400 ${dst}
+		exit 0
+	fi
+
+user=$1; uid=$2; grp=$3;
+
+home="/ram/home/${user}/"
+dst="${home}/.ssh/authorized_keys"
+
+mkdir -p ${home}
+chmod 700 ${home}
+mkdir -p ${home}/.ssh
+chmod 700 ${home}/.ssh
+
+awk '/^auth_keys=/||/^user_keys=/||/^'"${user}"'_keys=/ {
+	x=substr($0,index($0,"=")+1);
+	gsub("\"","",x);
+	print x                 
+	}' ${syscfg} > ${dst}
+
+chmod 400 ${dst}
+chown ${uid}:${grp} ${home} ${dst} ${home}/.ssh

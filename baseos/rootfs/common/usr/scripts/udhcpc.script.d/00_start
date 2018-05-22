@@ -1,0 +1,45 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+mkdir -p /ram/dhcp
+
+case ${action} in
+	bound)
+		ifconfig ${interface} ${ip} netmask ${subnet}
+		route add default gw ${router}
+		
+		if ! test "${staticResolvers}"
+			then
+				{
+				echo "search ${domain}"
+				for i in ${dns}
+				do
+					echo "nameserver ${i}"
+				done
+				} > /ram/etc/resolv.conf
+			fi
+			
+		{
+		echo "${interface}_ip=${ip}"
+		echo "${interface}_subnet=${subnet}"
+		echo "${interface}_router=${router}"
+		} > /ram/dhcp/${interface}
+		
+		{
+		echo "127.0.0.1 localhost"
+		echo "${ip} ${serverHostname}"
+		} > /ram/etc/hosts
+
+		echo "IP Address: ${ip}/${subnet} gw ${router}" > /dev/console
+		                                
+		/usr/scripts/make_firewall
+		init 5
+		;;
+	deconfig)
+		ifconfig ${interface} 0.0.0.0
+		ifconfig ${interface} down
+		ifconfig ${interface} up
+		;;
+esac

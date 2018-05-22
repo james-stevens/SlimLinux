@@ -1,0 +1,48 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+mount -o noexec -t proc /proc /proc
+mount -o noexec -t sysfs /sys /sys
+mkdir /dev/pts
+mount -o noexec -t devpts /dev/pts /dev/pts
+
+fsck -A -y
+mount -a
+mount -ro remount,noatime /
+awk '{ if ($3=="swap") print $1 }' /etc/fstab | while read dev
+do
+	mkswap ${dev}
+done
+swapon -a
+
+mount -t tmpfs -o noexec,size=3M /ram /ram
+cd /ram
+mkdir ssh root tmp etc run net-snmp
+chmod 777 run tmp
+chmod +t run tmp
+touch etc/adjtime
+
+mkdir -m 700 root/.ssh
+/usr/scripts/make_auth_keys
+
+ifconfig lo 127.0.0.1
+
+mkdir -p /opt/data/log
+touch /var/log/lastlog /var/log/wtmp
+
+/usr/scripts/make_inittab
+/usr/scripts/make_shadow
+
+. /usr/scripts/opts
+hostname ${serverHostname}
+
+mapfile="/etc/kmap/uk.bmap.gz"
+if test "${keyboardMap}" -a -f /etc/kmap/${keyboardMap}.bmap.gz
+	then
+		mapfile="${keyboardMap}"
+	fi
+zcat ${mapfile} | loadkmap
+
+awk '{ printf "\nSlimLinux - %s\n\n",substr($0,1,index($0,"(")-2); }' /proc/version > /ram/etc/motd

@@ -1,0 +1,32 @@
+rootPassword=77IE6wmOHF4kE
+
+allowRootSSH=Y
+allowConsoleLogin=Y
+
+runningSSHd=Y
+
+serverHostname=slimlinux.example.net
+serverAdmin=admin@exmaple.net
+
+syslogToDisk=N
+# syslogSize=
+
+# ntpServers=
+# rdateServers=
+
+sshRemoteAllow="0/0"
+icmpRemoteAllow="0/0"
+
+firewallLogging=N
+
+keyboardMap=uk
+
+# static4GW=
+# static4IP=
+# static4Mask=
+
+# static6GW=
+# static6IP=
+# static6Mask=
+
+# staticResolvers=

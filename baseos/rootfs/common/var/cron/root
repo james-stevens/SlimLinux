@@ -1,0 +1,2 @@
+0 * * * * /usr/bin/every_hour > /tmp/every_hour.log 2>&1
+0 0 * * * /usr/bin/every_day > /tmp/every_day.log 2>&1

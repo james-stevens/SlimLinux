@@ -1,0 +1,15 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+	
+if test "${firewallLogging}" = "Y"
+	then
+		echo "-A OUTPUT -j LOG --log-prefix <OUT>"
+		echo "-A INPUT -j LOG --log-prefix <INP>"
+	fi
+	
+echo "-A INPUT -j DROP"
+echo "-A FORWARD -j DROP"
+echo "-A OUTPUT -j DROP"
+echo "COMMIT" 

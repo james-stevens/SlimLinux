@@ -1,0 +1,20 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+end_cmd="$1"
+
+/sbin/killall5 -15
+sleep 5
+/sbin/killall5 -9
+
+/sbin/swapoff -a
+/sbin/sync
+/sbin/umount -a
+/sbin/mount -v -no remount,ro /
+
+/sbin/sync
+
+echo "Running - ${end_cmd}"
+/sbin/${end_cmd} -f

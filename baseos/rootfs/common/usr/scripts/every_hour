@@ -1,0 +1,13 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+date
+
+. /usr/scripts/opts
+
+for file in /usr/scripts/every_hour.d/*
+	do
+		. ${file}
+	done

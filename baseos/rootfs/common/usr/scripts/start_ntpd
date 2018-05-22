@@ -1,0 +1,13 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+. /usr/scripts/opts
+
+for svr in ${ntpServers}
+do
+	echo "server ${svr}"
+done > /ram/etc/ntp.conf
+
+exec /sbin/ntpd -nN

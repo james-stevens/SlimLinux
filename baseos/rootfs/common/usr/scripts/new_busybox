@@ -1,0 +1,27 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+if ! test -f /tmp/busybox
+	then
+		echo "New busybox missing"
+		ls -l /tmp/busybox
+		exit 0
+	fi
+
+mount -wno remount,sync,noatime /
+
+cd /sbin
+cp /tmp/busybox busybox.new
+
+busy_id=$(ls -i /sbin/busybox | awk '{ print $1 }')
+
+busybox.new rm $(ls -i /sbin | awk '{ if (($1=='"${busy_id}"')&&($NF!="busybox")) print $NF }')
+
+busybox.new mv busybox.new busybox
+
+/sbin/busybox --list | grep -v '^su$' | while read file
+do
+	/sbin/busybox ln busybox ${file}
+done
