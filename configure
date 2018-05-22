@@ -9,7 +9,20 @@ rootfs=${isobase}/rootfs.txz
 initrd=${isobase}/isolinux/initrd.img
 md5chk=${isobase}/chk.md5
 
-if test -d rootfs -o ! -d baseos/rootfs
+if ! mkisofs --version | grep -q Copyright
+    then
+        echo "ERROR: Test run of 'mkisofs' failed"
+        exit 0
+    fi
+
+if ! isohybrid --help 2>&1 | grep -q Options
+    then
+        echo "ERROR: Test run of 'isohybrid' failed"
+        exit 0
+    fi
+
+
+if test ! -d baseos/rootfs
 	then
 		echo "Please run from the parent directory of 'baseos'"
 		exit 0
