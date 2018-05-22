@@ -1,0 +1,24 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+awk 'BEGIN {
+	x="'"${*}"'"
+	n = split(x,a," ");
+	
+	shw = int(a[1]);
+	
+	for(l=2;l<=n;l++) {
+		msk=""; adr=a[l];
+		
+		p = index(adr,"/");
+		
+		if (index(adr,":")>0) { typ=6; msk=128; }
+		else  { typ=4; msk=32; }
+		
+		if (p>0) { msk=substr(adr,p+1); adr=substr(adr,1,p-1); }
+		
+		if ((shw==0)||(typ==shw)) print adr,msk,typ,a[l]
+		}
+	}'

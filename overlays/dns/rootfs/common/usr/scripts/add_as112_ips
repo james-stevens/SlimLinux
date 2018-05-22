@@ -1,0 +1,26 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+. /usr/scripts/opts
+
+if ! test "${namedWithAS112}" = "Y"; then exit 0; fi
+
+x=0
+for ip in 192.175.48.1 192.175.48.6 192.175.48.42 192.31.196.1
+	do
+		if ! ifconfig eth0:${x} | grep -q ":${ip} "
+			then
+				ifconfig eth0:${x} ${ip} netmask 255.255.255.255
+			fi
+		x=$(expr ${x} + 1)
+	done
+	
+for ip in 2620:4f:8000::1 2620:4f:8000::6 2620:4f:8000::42 2001:4:112::1
+	do
+		if ! ifconfig eth0 | grep -q " ${ip}/128 "
+			then
+				ip addr add ${ip}/128 dev eth0
+			fi
+	done

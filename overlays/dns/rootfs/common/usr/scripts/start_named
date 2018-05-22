@@ -1,0 +1,38 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+. /usr/scripts/opts
+
+mkdir -p ${namedbase}
+cd ${namedbase}
+
+mkdir -p dev
+cp -a /dev/random /dev/urandom /dev/null /dev/zero dev
+mkdir -p etc
+
+mkdir -p var var/named var/log var/run var/run/named
+chmod 777 var/log var/run var/run/named
+chmod 755 . dev var etc
+chown nobody: var/named
+
+if test "${namedWithAS112}" = "Y"
+	then
+		/usr/scripts/make_db.hostname.as112
+
+		cp -a /opt/dns/etc/db.as112.arpa \
+			/opt/dns/etc/db.dd-empty \
+			/opt/dns/etc/db.dr-empty \
+			var/named
+	fi
+
+/usr/scripts/make_named_conf
+
+if ! /usr/sbin/named-checkconf -t ${namedbase}
+	then
+		logger -s -t "start_named" "named.conf failed named-checkconf"
+		exec sleep 100
+	fi
+
+exec /usr/sbin/named -u nobody -t ${namedbase} -f

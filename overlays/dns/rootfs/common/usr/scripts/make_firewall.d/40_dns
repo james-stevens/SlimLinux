@@ -1,0 +1,83 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+bind_local="1024:65535"
+
+echo "
+-A INPUT -p udp -m udp --dport 53 -j UDPDNS
+-A INPUT -p tcp -m tcp --dport 53 -j TCPDNS
+-A OUTPUT -p udp -m udp --sport 53 -j OUTUDPDNS
+-A OUTPUT -p tcp -m tcp --sport 53 -j OUTTCPDNS
+#"
+
+
+if test "${resolverActive}" = "Y"
+	then
+		echo "-A INPUT -p udp --dport ${bind_local} --sport 53 -j ACCEPT"
+		echo "-A INPUT -p tcp --dport ${bind_local} --sport 53 -j ACCEPT"
+		echo "-A OUTPUT -p udp --sport ${bind_local} --dport 53 -j ACCEPT"
+		echo "-A OUTPUT -p tcp --sport ${bind_local} --dport 53 -j ACCEPT"
+	fi
+	
+	
+if test "${bindRndcKey}"
+	then
+		if test "${bindRndcAllow}"
+		then
+	        /usr/scripts/by_addr_type ${ipv} ${bindRndcAllow} | while read adr msk typ all
+			do
+				echo "-A INPUT -p tcp -s ${all} --dport 953 -j ACCEPT"
+				echo "-A OUTPUT -p tcp -d ${all} --sport 953 -j ACCEPT"
+			done
+		else
+			echo "-A INPUT -p tcp --dport 953 -j ACCEPT"
+			echo "-A OUTPUT -p tcp --sport 953 -j ACCEPT"
+		fi
+	fi
+	
+	
+	
+if test "${firewallBlockResp}" = "Y"
+	then
+		if test "${firewallLogging}" = "Y"
+			then
+				echo "-A UDPDNS -m u32 --u32 0x1b&0x80=0x80 -j LOG --log-prefix <RESP>"	
+			fi
+		echo "-A UDPDNS -m u32 --u32 0x1b&0x80=0x80 -j DROP"	
+	fi
+	
+	
+	
+if test "${firewallBlockRD1}" -a ! "${firewallBlockRD1}" = "N"
+	then
+        /usr/scripts/by_addr_type ${ipv} ${resolverAllowed} | while read adr msk typ all
+			do
+				echo "-A RD1 -s ${all} -j RETURN"
+			done
+			
+		if ! test "${firewallBlockRD1}" = "Y"
+			then
+				l=$(expr ${firewallBlockRD1} + 0)
+				if test "${l}" -le 0; then l=10; fi
+				b=$(expr ${l} / 10)
+				if test "${b}" -le 5; then b=5; fi
+				
+				echo "-A RD1 -m limit --limit ${l} --limit-burst ${b} -j RETURN"
+			fi
+			if test "${firewallLogging}" = "Y"
+				then
+					echo "-A RD1 -j LOG --log-prefix <RD1>"
+				fi
+				
+		echo "-A RD1 -j DROP"
+		echo "-A UDPDNS -m u32 --u32 0x1b&0x1=1 -j RD1"
+	fi
+
+
+echo "-A OUTUDPDNS -j ACCEPT"
+echo "-A OUTTCPDNS -j ACCEPT"
+echo "-A UDPDNS -j ACCEPT"
+echo "-A TCPDNS -j ACCEPT"
+

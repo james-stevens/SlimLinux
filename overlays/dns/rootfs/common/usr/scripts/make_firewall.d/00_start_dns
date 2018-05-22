@@ -1,0 +1,10 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+echo ":TCPDNS - [0:0]"
+echo ":UDPDNS - [0:0]"
+echo ":OUTTCPDNS - [0:0]"
+echo ":OUTUDPDNS - [0:0]"
+echo ":RD1 - [0:0]"
