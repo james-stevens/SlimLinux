@@ -1,0 +1,274 @@
+#! /bin/sh
+
+parent="$PWD"
+
+base="${parent}/baseos"
+cfg=${parent}/mkiso.cfg
+isobase=${parent}/iso
+
+rootfs=${isobase}/rootfs.txz 
+configfs=${isobase}/config.tgz 
+datafs=${isobase}/data.txz 
+
+initrd=${isobase}/isolinux/initrd.img
+md5chk=${isobase}/chk.md5
+
+if test -d rootfs -o ! -d baseos/rootfs
+	then
+		echo "Please run from the parent directory of 'baseos'"
+		exit 0
+	fi
+
+
+if ! mkisofs --version | grep -q Copyright
+	then
+		echo "ERROR: Test run of 'mkisofs' failed"
+		exit 0
+	fi
+
+if ! isohybrid --help 2>&1 | grep -q Options
+	then
+		echo "ERROR: Test run of 'isohybrid' failed"
+		exit 0
+	fi
+
+
+cmd="$1"
+
+if test "${cmd}" = "--help" -o "${cmd}" = "-h"
+	then
+		echo "Usage: $0 [ clean | initrd | rootfs ]"
+		echo "clean  = remove rootfs.txz & initrd.img and exit"
+		echo "initrd = re-make initrd.img"
+		echo "rootfs = re-make rootfs.txz"
+		exit 0
+	fi
+
+
+if test "${cmd}" = "initrd"; then rm -f ${initrd}; fi
+
+if test "${cmd}" = "rootfs"; then rm -f ${rootfs}; fi
+
+if test "${cmd}" = "clean"
+	then
+		cd ${parent}
+		rm -rf ROOT CONFIG DATA
+		rm -f ${rootfs} ${initrd} iso/isolinux/kernel *.iso ${base}/iso/install.cfg
+		rm -f ${md5chk}
+		exit 0
+	fi
+
+
+if ! test -f ${cfg}; then sh configure; fi
+
+
+. ${cfg}
+
+if ! test -d baseos/rootfs/common -a -d baseos/rootfs/${binary}
+	then
+		echo "ERROR: base O/S failure"
+		ls -l baseos/rootfs/common -a -d baseos/rootfs/${binary}
+		exit 0
+	fi
+
+for ovr in ${overlays}
+	do
+		if ! test -d overlays/${ovr}/rootfs -o overlays/${ovr}/config
+			then
+				echo "ERROR: Overlay '${ovr}' failure"
+				ls -l overlays/${ovr}/rootfs overlays/${ovr}/config
+				exit 0
+			fi
+	done
+
+
+iso="${binary}.iso"
+
+if test -z "${kernel}" -o ! -f "${kernel}"
+	then
+		kernel="${parent}/kernel/kernel"
+	fi
+
+rm -f ${iso}
+
+if ! test -f ${initrd}
+	then
+		echo "Building 'initrd' for install O/S"
+
+		rm -f install_os.dd
+		dd if=/dev/zero of=install_os.dd bs=1K count=8000 > /dev/null 2>&1
+		mke2fs -q -N 200 -m 0 -F install_os.dd
+		mkdir install_os.dd_mnt
+		mount -o loop install_os.dd install_os.dd_mnt
+
+		cd ${base}/rootfs
+		tar -cf - -T ${parent}/build_files/common.lst | (cd ${parent}/install_os.dd_mnt ; tar --strip 1 -xf -)
+
+		cd ${parent}/install_os
+		cp -a . ${parent}/install_os.dd_mnt
+		cd ${parent}
+
+		sync
+		umount install_os.dd_mnt
+		sync
+		rmdir install_os.dd_mnt
+		gzip -9 install_os.dd
+
+		cp -a install_os.dd.gz ${initrd}
+
+		rm -f install_os.dd.gz
+	fi
+
+
+
+function add_depends()
+{
+	ovr=$1
+	file=$2
+
+	if ! test -f ${parent}/overlays/${ovr}/${file}.cfg; then return; fi
+
+	depends="";
+	. ${parent}/overlays/${ovr}/${file}.cfg
+	if test "${depends}"
+		then
+			overlays="${overlays} ${depends}"
+			for x in ${depends}
+				do
+					add_depends $x common
+					add_depends $x ${binary}
+				done
+		fi
+}
+
+
+function add_overlays()
+{
+	for ovr in ${overlays}
+		do
+			add_depends ${ovr} common
+			add_depends ${ovr} ${binary}
+		done
+
+	overlays=$(awk 'BEGIN { 
+		ovr="'"${overlays}"'"
+		n=split(ovr,a); out=""; 
+		for(l=1;l<=n;l++) 
+			if (done[a[l]]=="") 
+				{ done[a[l]]="Y"; out=out _ " " _ a[l] }
+		print substr(out,2)
+		}')
+
+	echo "Total overlays=${overlays}"
+
+	for ovr in ${overlays}
+		do
+		d="${parent}/overlays/${ovr}/data/"
+		if test -d "${d}"
+			then
+				echo "- Adding data: ${ovr}/data"
+				mkdir -p ${parent}/DATA
+				cd ${d}; cp -a . ${parent}/DATA
+			fi
+
+		d="${parent}/overlays/${ovr}/config/"
+		if test -d "${d}"
+			then
+				echo "- Adding config: ${ovr}/config"
+				mkdir -p ${parent}/CONFIG
+				cd ${d}; cp -a . ${parent}/CONFIG
+			fi
+
+		for dir in common ${binary}
+			do
+			d="${parent}/overlays/${ovr}/rootfs/${dir}"
+			if test -d "${d}"
+				then
+					echo "- Adding overlay code: ${ovr}/${dir}"
+					cd ${d}; cp -a . ${parent}/ROOT
+				fi
+			done
+		done
+}
+
+
+
+if ! test -f ${rootfs}
+	then
+		echo "Building ROOT filesystem"
+
+		rm -rf ${parent}/ROOT ${parent}/CONFIG ${parent}/DATA
+		rm -f ${rootfs} ${configfs} ${datafs}
+
+		mkdir ${parent}/ROOT
+		cd ${base}/rootfs
+
+		for dir in common ${binary}
+			do
+				echo "- Adding base O/S code: ${dir}"
+				cd ${base}/rootfs/${dir}
+				cp -a . ${parent}/ROOT
+			done
+
+		if test "${overlays}"; then add_overlays; fi
+
+		if test "${kernel}" -a -f "${kernel}"
+			then
+				cp ${kernel} ${parent}/ROOT/boot/kernel
+				chmod 400 ${parent}/ROOT/boot/kernel
+			fi
+
+		cd ${parent}
+		du -sh ROOT
+		cd ROOT
+		echo "- compressing ROOT file system"
+		tar Jcf ${rootfs} .
+		du -sh ${rootfs}
+
+		if test -d ${parent}/CONFIG
+			then
+				cd ${parent}/CONFIG
+				find -not -name . | tar --no-recursion -T - -cf - | gzip -9c > ${configfs}
+			fi
+
+		if test -d ${parent}/DATA
+			then
+				cd ${parent}/DATA
+				tar Jcf ${datafs} .
+			fi
+	fi
+
+
+echo "Making ISO / USB image"
+
+{
+echo "baseos=\"${binary}\""
+echo "overlays=\"${overlays}\""
+} > ${isobase}/install.cfg
+
+cp ${isobase}/install.cfg ${isobase}/version.txt
+
+cp ${kernel} ${isobase}/isolinux/kernel
+
+cd ${isobase}
+md5sum $(find -type f -not -name chk.md5) > ${md5chk}
+
+
+mkisofs -quiet -o ${parent}/${iso} \
+	-b isolinux/isolinux.bin \
+	-c isolinux/boot.cat \
+	-no-emul-boot -boot-load-size 4 \
+	-boot-info-table \
+	-V "SlimLinux" .
+
+rm -f ${isobase}/isolinux/kernel
+
+cd ${parent}
+isohybrid ${iso}
+
+du -h ${iso}
+
+if test "${upload_ip}" -a "${upload_dir}"
+	then
+		tar cf - ${iso} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
+	fi
