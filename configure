@@ -1,0 +1,64 @@
+#! /bin/sh
+
+parent="$PWD"
+
+base="${parent}/baseos"
+cfg=${parent}/mkiso.cfg
+isobase=${parent}/iso
+rootfs=${isobase}/rootfs.txz 
+initrd=${isobase}/isolinux/initrd.img
+md5chk=${isobase}/chk.md5
+
+if test -d rootfs -o ! -d baseos/rootfs
+	then
+		echo "Please run from the parent directory of 'baseos'"
+		exit 0
+	fi
+
+
+cd ${base}/rootfs
+
+binary="UNKNOWN"
+while ! test -d "${binary}"
+	do
+		echo "Select a binary base"; echo ""
+		find * -type d -mindepth 0 -maxdepth 0 -not -name common
+		echo ""; echo -n "binary base:"
+		read binary
+	done
+
+
+overlays=""; sep="";
+thisoverlay="UNKNOWN"
+cd ${parent}
+while test "${thisoverlay}" = "UNKNOWN"
+	do
+		echo "Select an overlay -> Current Overlays: ${overlays}"; echo ""
+
+		ls -d */rootfs | awk -F/ '/^overlay_/ { print substr($1,index($1,"_")+1) }'
+
+		echo ""; echo -n "Add overlay [blank=done] :"
+		read thisoverlay
+		if test -d "overlay_${thisoverlay}"
+			then
+				overlays="${overlays}${sep}${thisoverlay}"; sep=" ";
+				thisoverlay="UNKNOWN"
+			fi
+	done
+
+
+{
+echo "# SlimLinux mkiso.cfg"
+echo ""
+echo "binary=\"${binary}\""
+echo "overlays=\"${overlays}\""
+} > ${cfg}
+
+
+echo ""
+echo "=================== mkiso.cfg ========================"
+cat ${cfg}
+echo "=================== mkiso.cfg ========================"
+echo ""
+
+make clean
