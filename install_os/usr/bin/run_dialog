@@ -269,7 +269,7 @@ if test "${instype}" = "Continue"
 
 
 {
-mke2fs -m 0 -N 40 -q ${disk}1 >/dev/null 2>&1
+mke2fs -m 0 -q ${disk}1 >/dev/null 2>&1
 mkswap ${disk}3
 } >/dev/tty4 2>&1
 
@@ -306,7 +306,7 @@ sync
 
 if test "${instype}" = "Continue"
 	then
-		mke2fs -m 0 -N 20 -q ${disk}2 >/dev/null 2>&1
+		mke2fs -m 0 -q ${disk}2 >/dev/null 2>&1
 		mount -t ext2 -no nodiratime,noatime,sync ${disk}2 /mnt/opt/config
 
 		cd /mnt/opt/config

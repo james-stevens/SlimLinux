@@ -83,7 +83,7 @@ if ! test -f ${initrd}
 
 		rm -f install_os.dd
 		dd if=/dev/zero of=install_os.dd bs=1K count=8000 > /dev/null 2>&1
-		mke2fs -q -N 200 -m 0 -F install_os.dd
+		mke2fs -q -N 400 -m 0 -F install_os.dd
 		mkdir install_os.dd_mnt
 		mount -o loop install_os.dd install_os.dd_mnt
 
