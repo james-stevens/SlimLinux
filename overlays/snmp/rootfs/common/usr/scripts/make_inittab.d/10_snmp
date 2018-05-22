@@ -1,0 +1,10 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+
+if test "${runningSnmpd}" = "Y"
+    then
+        echo "sn:45:respawn:/usr/scripts/start_snmpd"
+    fi

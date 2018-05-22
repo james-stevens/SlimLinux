@@ -1,0 +1,8 @@
+
+runningSnmpd=Y
+
+serverFacility="Name of Facility or similar"
+serverLocDesc="City, Country"
+serverLocation="45 25 0.000 N 75 42 0.000 W 80.00m 1m 10000m 10m"
+
+snmpRemoteAllow=0/0

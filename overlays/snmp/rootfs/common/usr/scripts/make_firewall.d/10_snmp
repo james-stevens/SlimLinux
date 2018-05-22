@@ -1,0 +1,15 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+if test "${runningSnmpd}" = "Y"
+	then
+		src="${snmpRemoteAllow}";
+		if test -z "${src}"; then src="0/0"; fi
+        /usr/scripts/by_addr_type ${ipv} ${src} | while read adr msk typ all
+			do
+				echo "-A INPUT -p udp -m udp -s ${all} --dport 161 -j ACCEPT"
+				echo "-A OUTPUT -p udp -m udp -d ${all} --sport 161 -j ACCEPT"
+			done
+	fi
