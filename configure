@@ -52,7 +52,7 @@ while test "${thisoverlay}" = "UNKNOWN"
 
 		echo ""; echo -n "Add overlay [blank=done] :"
 		read thisoverlay
-		if test -d "overlay/${thisoverlay}"
+		if test "${thisoverlay}" -a -d "overlays/${thisoverlay}"
 			then
 				overlays="${overlays}${sep}${thisoverlay}"; sep=" ";
 				thisoverlay="UNKNOWN"
@@ -74,4 +74,4 @@ cat ${cfg}
 echo "=================== mkiso.cfg ========================"
 echo ""
 
-make clean
+make clean all

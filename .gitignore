@@ -1,1 +1,10 @@
 mkiso.cfg
+ROOT
+CONFIG
+DATA
+*.iso
+iso/rootfs.txz
+iso/config.tgz
+iso/data.txz
+iso/isolinux/initrd.img
+iso/isolinux/kernel

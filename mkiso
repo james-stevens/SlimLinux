@@ -13,7 +13,7 @@ datafs=${isobase}/data.txz
 initrd=${isobase}/isolinux/initrd.img
 md5chk=${isobase}/chk.md5
 
-if ! test -d baseos/rootfs -d overlays
+if ! test -d baseos/rootfs -a -d overlays
 	then
 		echo "Please run from the parent directory of 'baseos'"
 		exit 0

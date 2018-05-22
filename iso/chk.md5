@@ -1,0 +1,10 @@
+eb5fc622ea61cb640b5f3d9001e1b13b  ./install.cfg
+eb5fc622ea61cb640b5f3d9001e1b13b  ./version.txt
+867cb221f62c177a48dca842944d9043  ./readme.txt
+7d485ab19e5f072e0b7c19b93f95e3a0  ./isolinux/ldlinux.c32
+7445c9174d3d61e6b3aeeb85a1defbaf  ./isolinux/message.txt
+36bf12fdce0da6ee3921a82d6ab417f3  ./isolinux/isolinux.bin
+4b19bdb849625c7fc2eb388390a0934b  ./isolinux/isolinux.cfg
+b5079a44741802e35b3713ac65ca88bd  ./isolinux/initrd.img
+f8e3c20ff8c3db285fe3ed248d02286b  ./isolinux/kernel
+e80a45e85bd03f376d409b793da6b1ce  ./rootfs.txz
