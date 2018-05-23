@@ -4,24 +4,30 @@
 # see License.txt for details
 
 
-if test "${static4IP}" -a "${static4Mask}"
+ip link set eth0 up
+
+rm -f /ram/addrs
+awk '/^static[46]IP=/ { 
+	ipv=int(substr($0,7));
+	x=substr($0,index($0,"=")+1); gsub("\"","",x);
+	split(x,a,"/");
+
+	print ipv,x,a[1],a[2] >> "/ram/addrs"
+	print ipv,x,a[1],a[2]
+	}' ${syscfg} | while read ipv sub addr mask
+	do
+		ip -${ipv} addr add ${sub} dev eth0
+	done
+
+if test "${static4GW}"
 	then
-		ifconfig eth0 ${static4IP} netmask ${static4Mask}
-		if test "${static4GW}"
-			then
-				ip -4 route add default via ${static4GW}
-			fi
+		ip -4 route add default via ${static4GW}
+	fi
+if test "${static6GW}"
+	then
+		ip -6 route add default via ${static6GW}
 	fi
 	
-if test "${static6IP}" -a "${static6Mask}"
-	then
-		ip addr add ${static6IP}/${static6Mask} dev eth0
-		if test "${static6GW}"
-			then
-				ip -6 route add default via ${static6GW}
-			fi
-	fi
-
 echo 10000 > /proc/sys/net/ipv4/tcp_max_syn_backlog
 echo 10000 > /proc/sys/net/core/somaxconn
 echo 5 > /proc/sys/net/ipv4/tcp_fin_timeout
@@ -55,7 +61,7 @@ if test "${static4IP}"
 	fi
 } > /ram/etc/hosts
 
-awk '/^route=/ {
+awk '/^staticRoute=/ {
 	x=substr($0,index($0,"=")+1);
 	gsub("\"","",x);
 	n=split(x,a," ");

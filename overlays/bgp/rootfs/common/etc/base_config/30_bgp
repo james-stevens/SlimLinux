@@ -1,0 +1,12 @@
+
+extraUser="quagga:quagga - 98"
+
+runningBGPd=Y
+
+bgpPassword=aa
+bgpEditPassword=zz
+
+bgpRemoteAllow=0/0
+
+bgpWithAS112=Y
+# bgpMyASN=

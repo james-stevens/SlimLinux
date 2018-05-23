@@ -1,0 +1,114 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+#
+# Also a lot lifted from RFC7534
+# https://tools.ietf.org/html/rfc7534
+
+. /usr/scripts/opts
+
+tmp=/tmp/make_bgpd_conf_$$_$RANDOM
+
+{
+echo "! bgpd.conf
+!
+hostname ${serverHostname}
+"
+if test "${bgpPassword}"; then echo "password ${bgpPassword}"; else echo "password aa"; fi
+if test "${bgpEditPassword}"; then echo "enable password ${bgpEditPassword}"; fi
+
+if test "${bgpWithAS112}" = "Y"
+then
+echo "!
+! Note that all AS112 nodes use the local Autonomous System Number
+! 112, and originate the IPv4 prefixes 192.175.48.0/24 and
+! 192.31.196.0/24 and the IPv6 prefixes 2620:4f:8000::/48 and
+! 2001:4:112::/48.
+!
+! IPv4-only or IPv6-only AS112 nodes should omit advertisements
+! for address families they do not support.
+!
+ip prefix-list AS112-v4 permit 192.175.48.0/24
+ip prefix-list AS112-v4 permit 192.31.196.0/24
+!
+ipv6 prefix-list AS112-v6 permit 2620:4f:8000::/48
+ipv6 prefix-list AS112-v6 permit 2001:4:112::/48
+"
+echo 'ip as-path access-list 1 permit ^$'
+echo "!
+router bgp 112
+bgp router-id ${my4addr}
+network 192.175.48.0/24
+network 192.31.196.0/24
+!
+"
+else
+	echo "router bgp ${bgpMyASN}"
+	echo "bgp router-id ${my4addr}"
+fi
+
+awk 'BEGIN { bgpWithAS112="'"${bgpWithAS112}"'"; }
+/^bgpPeers=/ {
+	x=substr($0,index($0,"=")+1);
+	gsub("\"","",x);
+	n=split(x,a,",");
+	if (index(a[1],".")) {
+		printf "neighbor %s remote-as %d\n",a[1],a[2]
+		printf "neighbor %s next-hop-self\n",a[1]
+		if (bgpWithAS112=="Y") {
+			printf "neighbor %s prefix-list AS112-v4 out\n",a[1]
+			printf "neighbor %s filter-list 1 out\n",a[1]
+			}
+		for(i=3;i<=n;i++) printf "neighbor %s %s\n",a[1],a[i]
+		print "!"
+		}
+	}' ${syscfg}
+
+
+awk 'BEGIN { bgpWithAS112="'"${bgpWithAS112}"'"; }
+/^bgpPeers=/ {
+	x=substr($0,index($0,"=")+1);
+	gsub("\"","",x);
+	split(x,a,",");
+	if (index(a[1],":")) {
+		printf "neighbor %s remote-as %d\n",a[1],a[2]
+		printf "neighbor %s next-hop-self\n",a[1]
+		if (bgpWithAS112=="Y") {
+			printf "neighbor %s prefix-list AS112-v6 out\n",a[1]
+			printf "neighbor %s filter-list 1 out\n",a[1]
+			}
+		for(i=3;i<=n;i++) printf "neighbor %s %s\n",a[1],a[i]
+		print "!"
+		}
+	}' ${syscfg}
+
+
+echo "address-family ipv6 unicast"
+if test "${bgpWithAS112}" = "Y"
+	then
+		echo "network 2620:4f:8000::/48"
+		echo "network 2001:4:112::/48"
+	fi
+
+awk 'BEGIN { bgpWithAS112="'"${bgpWithAS112}"'"; }
+/^bgpPeers=/ {
+	x=substr($0,index($0,"=")+1);
+	gsub("\"","",x);
+	split(x,a,",");
+	if (index(a[1],":")) {
+		printf "neighbor %s activate\n",a[1]
+		if (bgpWithAS112=="Y") {
+			printf "neighbor %s prefix-list AS112-v6 out\n",a[1]
+			printf "neighbor %s filter-list 1 out\n",a[1]
+			}
+		for(i=3;i<=n;i++) printf "neighbor %s %s\n",a[1],a[i]
+		print "!"
+		}
+	}' ${syscfg}
+
+
+} > ${tmp}
+
+
+mv ${tmp} /ram/etc/bgpd.conf

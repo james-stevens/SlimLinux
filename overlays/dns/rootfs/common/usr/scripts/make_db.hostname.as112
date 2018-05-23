@@ -18,7 +18,7 @@ if test "${serverAdmin}"
 for x in net arpa
 do
 full="hostname.as112.${x}"
-path="${namedbase}/var/named/db.${full}"
+path="${dnsbase}/var/dns/db.${full}"
 
 {
 echo "; db.${full}"
@@ -46,7 +46,7 @@ if test "${serverLocation}"
 
 } > ${path}
 
-if ! /usr/sbin/named-checkzone -q ${full} ${path}
+if ! named-checkzone -q ${full} ${path}
 	then
 		logger -s -t "named-checkzone" "ERROR: ${full} failed validation checks"
 	fi

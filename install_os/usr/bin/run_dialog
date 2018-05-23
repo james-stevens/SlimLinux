@@ -325,8 +325,7 @@ if test "${instype}" = "Continue"
 
 				if test "${addrget}" = "Static"
 					then
-						echo "static4IP=${ipaddr}"
-						echo "static4Mask=${netmask}"
+						echo "static4IP=${ipaddr}/${netmask}"
 						echo "static4GW=${gateway}"
 					fi
 

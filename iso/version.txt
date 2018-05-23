@@ -1,2 +1,2 @@
 baseos="slackware_x64_v14.2"
-overlays="dns bgp snmp libcap"
+overlays="svr1 dns snmp bgp strace libcap"

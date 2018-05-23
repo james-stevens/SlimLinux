@@ -5,22 +5,15 @@
 
 . /usr/scripts/opts
 
-if ! test "${namedWithAS112}" = "Y"; then exit 0; fi
-
-x=0
-for ip in 192.175.48.1 192.175.48.6 192.175.48.42 192.31.196.1
-	do
-		if ! ifconfig eth0:${x} | grep -q ":${ip} "
-			then
-				ifconfig eth0:${x} ${ip} netmask 255.255.255.255
-			fi
-		x=$(expr ${x} + 1)
-	done
-	
-for ip in 2620:4f:8000::1 2620:4f:8000::6 2620:4f:8000::42 2001:4:112::1
-	do
-		if ! ifconfig eth0 | grep -q " ${ip}/128 "
-			then
-				ip addr add ${ip}/128 dev eth0
-			fi
-	done
+if test "${dnsWithAS112}" = "Y"
+	then
+		for ip in 192.175.48.1 192.175.48.6 192.175.48.42 192.31.196.1
+			do
+				ip -4 add addr ${ip}/32 dev eth0 >/dev/null 2>&1
+			done
+			
+		for ip in 2620:4f:8000::1 2620:4f:8000::6 2620:4f:8000::42 2001:4:112::1
+			do
+				ip -6 addr add ${ip}/128 dev eth0 >/dev/null 2>&1
+			done
+	fi

@@ -4,16 +4,17 @@ serverFacility="Name of Facility or similar"
 serverLocDesc="City, Country"
 serverLocation="45 25 0.000 N 75 42 0.000 W 80.00m 1m 10000m 10m"
 
-namedLogging=Y
-namedDNSSEC=Y
-namedWithAS112=Y
+dnsLogging=Y
+dnsDNSSEC=Y
+dnsWithAS112=Y
 
-namedResolver=Y
-resolverAllowed="192.168.1.0/24"
+dnsResolver=Y
+dnsResolverAllowed="192.168.1.0/24"
 firewallBlockRD1=20
 firewallBlockResp=Y
 
-namedRndcKey=HJwviyb/QQGvY/07Pqq0zQ==
-namedRndcAllow=0/0
+dnsRndcKey=HJwviyb/QQGvY/07Pqq0zQ==
+dnsRndcAllow=0/0
 
-# namedSlave="zone master master ..."
+# dnsSlave="zone master master ..."
+# dnsMaster="zone"

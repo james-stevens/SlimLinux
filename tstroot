@@ -1,0 +1,25 @@
+#! /bin/sh
+
+mount -o noexec -t devtmpfs dev ROOT/dev
+mount -o noexec -t proc proc ROOT/proc
+mount -o noexec -t sysfs sys ROOT/sys
+mount -t tmpfs -o noexec,size=3M ram ROOT/ram
+mount -t tmpfs -o noexec,size=3M ram ROOT/opt/config
+mount -t tmpfs -o noexec,size=3M ram ROOT/opt/data
+mkdir ROOT/ram/run ROOT/ram/tmp
+chown root: ROOT/ram/tmp ROOT/ram/run
+chmod 777 ROOT/ram/tmp ROOT/ram/run
+chmod +t ROOT/ram/tmp ROOT/ram/run
+
+mkdir ROOT/ram/root
+chmod 700 ROOT/ram/root
+
+cat ROOT/etc/base_config/* > ROOT/opt/config/system.cfg
+
+chroot ROOT /usr/scripts/make_shadow
+chroot ROOT /etc/rc.d/boot.d/20_roothome
+export HOME="/ram/root"
+chroot ROOT /bin/sh -li
+
+umount ROOT/proc ROOT/sys ROOT/dev \
+	ROOT/ram ROOT/opt/config ROOT/opt/data

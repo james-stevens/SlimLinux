@@ -10,19 +10,20 @@ syscfg="/opt/config/system.cfg"
 if test -z "${static4IP}" -a -f /ram/dhcp/eth0
 	then
 		. /ram/dhcp/eth0
-		my4ip="${eth0_ip}"
-		my4mask="${eth0_subnet}"
+		my4ip="${eth0_ip}/${eth0_subnet}"
 		my4gw="${eth0_router}"
 	else
 		my4ip="${static4IP}"
-		my4mask="${static4Mask}"
 		my4gw="${static4GW}"
 	fi
 	
-if test "${my4ip}" -a "${my4mask}"
+if test "${my4ip}"
 	then
 		tmp=/tmp/opts_$$_$RANDOM
-		ipcalc -pbnm ${my4ip} ${my4mask} | awk '{ print "my4" _ tolower($0) }' > ${tmp}
+		{
+		ipcalc -pbnm ${my4ip} | awk '{ print "my4" _ tolower($0) }'
+		echo "${my4ip}" | awk -F/ '{ printf "my4addr=%s\n",$1 }'
+		} > ${tmp}
 		. ${tmp}
 		rm -f ${tmp}
 	fi

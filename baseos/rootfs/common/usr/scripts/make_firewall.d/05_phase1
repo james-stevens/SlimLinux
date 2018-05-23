@@ -1,0 +1,46 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+echo "-A INPUT -i lo -j ACCEPT"
+echo "-A OUTPUT -o lo -j ACCEPT"
+
+if test "${ipv}" = "4"
+	then
+		echo "-A INPUT -d 255.255.255.255 -j DROP"
+		echo "-A INPUT -d 224.0.0.1 -p 2 -j DROP"
+	fi
+
+if test "${ipv}" = "4" -a -z "${static4IP}"
+	then
+		# dhcp-client
+		echo "-A INPUT -p udp --sport 67 --dport 68 -j ACCEPT"
+	fi
+
+if test "${icmpRemoteAllow}"
+	then
+        icmp="icmp"; if test "${ipv}" = "6"; then icmp="icmpv6"; fi
+        /usr/scripts/by_addr_type ${ipv} ${icmpRemoteAllow} | while read adr msk typ all
+			do
+				echo "-A INPUT -p ${icmp} -s ${all} -j ACCEPT"
+				echo "-A OUTPUT -p ${icmp} -d ${all} -j ACCEPT"
+			done
+	else
+		echo "-A INPUT -p ${icmp} -j ACCEPT"
+		echo "-A OUTPUT -p ${icmp} -j ACCEPT"
+	fi
+
+bcast="${my4broadcast}"; if test "${ipv}" = "6"; then bcast="${my6broadcast}"; fi
+
+if test "${bcast}"
+	then
+		echo "-A INPUT -d ${bcast} -j DROP"
+	fi
+	
+echo "-A INPUT -p udp --dport 137 -j DROP
+-A INPUT -p udp --dport 138 -j DROP
+-A INPUT -p tcp --dport 135 -j DROP
+-A INPUT -p tcp --dport 139 -j DROP
+-A INPUT -p tcp --dport 445 -j DROP
+"

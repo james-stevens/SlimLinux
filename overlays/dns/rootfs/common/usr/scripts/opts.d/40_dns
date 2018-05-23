@@ -3,11 +3,11 @@
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
-if grep -q '^namedSlave=' ${syscfg}; then namedWithSlave=Y; fi
+if grep -q '^dnsSlave=' ${syscfg}; then dnsWithSlave=Y; fi
 
-namedbase="/ram/named"
-if test "${namedLogging}" = "Y" -o "${namedWithSlave}" = "Y"
+dnsbase="/ram/dns"
+if test "${dnsLogging}" = "Y" -o "${dnsWithSlave}" = "Y"
 	then
-		namedbase="/opt/data/named"
+		dnsbase="/opt/data/dns"
 	fi
 

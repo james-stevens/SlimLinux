@@ -7,9 +7,9 @@ mkdir -p /ram/dhcp
 
 case ${action} in
 	bound)
-		ifconfig ${interface} ${ip} netmask ${subnet}
-		route add default gw ${router}
-		
+		ip -4 addr add ${ip}/${subnet} dev eth0
+		ip -4 route add default via ${router}
+
 		if ! test "${staticResolvers}"
 			then
 				{
@@ -26,6 +26,8 @@ case ${action} in
 		echo "${interface}_subnet=${subnet}"
 		echo "${interface}_router=${router}"
 		} > /ram/dhcp/${interface}
+
+		echo "4 ${ip}/${subnet} ${ip} ${subnet}" >> /ram/addrs
 		
 		{
 		echo "127.0.0.1 localhost"
@@ -33,7 +35,7 @@ case ${action} in
 		} > /ram/etc/hosts
 
 		echo "IP Address: ${ip}/${subnet} gw ${router}" > /dev/console
-		                                
+
 		/usr/scripts/make_firewall
 		init 5
 		;;

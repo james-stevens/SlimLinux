@@ -41,7 +41,7 @@ hostname ${serverHostname}
 mapfile="/etc/kmap/uk.bmap.gz"
 if test "${keyboardMap}" -a -f /etc/kmap/${keyboardMap}.bmap.gz
 	then
-		mapfile="${keyboardMap}"
+		mapfile="/etc/kmap/${keyboardMap}.bmap.gz"
 	fi
 zcat ${mapfile} | loadkmap
 

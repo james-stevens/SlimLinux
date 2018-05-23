@@ -70,8 +70,10 @@ for ovr in ${overlays}
 
 iso="${binary}.iso"
 
-if test -z "${kernel}" -o ! -f "${kernel}"
+if test "${kernel}" -a -f "${parent}/kernel/${kernel}"
 	then
+		kernel="${parent}/kernel/${kernel}"
+	else
 		kernel="${parent}/kernel/kernel"
 	fi
 
@@ -81,7 +83,9 @@ if ! test -f ${initrd}
 	then
 		echo "Building 'initrd' for install O/S"
 
-		rm -f install_os.dd
+		umount install_os.dd_mnt >/dev/null 2>&1
+		rm -f install_os.dd install_os.dd_mnt
+
 		dd if=/dev/zero of=install_os.dd bs=1K count=8000 > /dev/null 2>&1
 		mke2fs -q -N 400 -m 0 -F install_os.dd
 		mkdir install_os.dd_mnt
@@ -198,11 +202,8 @@ if ! test -f ${rootfs}
 
 		if test "${overlays}"; then add_overlays; fi
 
-		if test "${kernel}" -a -f "${kernel}"
-			then
-				cp ${kernel} ${parent}/ROOT/boot/kernel
-				chmod 400 ${parent}/ROOT/boot/kernel
-			fi
+		cp ${kernel} ${parent}/ROOT/boot/kernel
+		chmod 400 ${parent}/ROOT/boot/kernel
 
 		cd ${parent}
 		du -sh ROOT

@@ -3,7 +3,7 @@
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
-bind_local="1024:65535"
+dns_local="1024:65535"
 
 echo "
 -A INPUT -p udp -m udp --dport 53 -j UDPDNS
@@ -13,20 +13,20 @@ echo "
 #"
 
 
-if test "${resolverActive}" = "Y"
+if test "${dnsResolver}" = "Y"
 	then
-		echo "-A INPUT -p udp --dport ${bind_local} --sport 53 -j ACCEPT"
-		echo "-A INPUT -p tcp --dport ${bind_local} --sport 53 -j ACCEPT"
-		echo "-A OUTPUT -p udp --sport ${bind_local} --dport 53 -j ACCEPT"
-		echo "-A OUTPUT -p tcp --sport ${bind_local} --dport 53 -j ACCEPT"
+		echo "-A INPUT -p udp --dport ${dns_local} --sport 53 -j ACCEPT"
+		echo "-A INPUT -p tcp --dport ${dns_local} --sport 53 -j ACCEPT"
+		echo "-A OUTPUT -p udp --sport ${dns_local} --dport 53 -j ACCEPT"
+		echo "-A OUTPUT -p tcp --sport ${dns_local} --dport 53 -j ACCEPT"
 	fi
 	
 	
-if test "${bindRndcKey}"
+if test "${dnsRndcKey}"
 	then
-		if test "${bindRndcAllow}"
+		if test "${dnsRndcAllow}"
 		then
-	        /usr/scripts/by_addr_type ${ipv} ${bindRndcAllow} | while read adr msk typ all
+	        /usr/scripts/by_addr_type ${ipv} ${dnsRndcAllow} | while read adr msk typ all
 			do
 				echo "-A INPUT -p tcp -s ${all} --dport 953 -j ACCEPT"
 				echo "-A OUTPUT -p tcp -d ${all} --sport 953 -j ACCEPT"

@@ -16,6 +16,7 @@ alias rwr='mount -wno remount,async,noatime,nodiratime /'
 alias psx='ps -o pid,ppid,vsz,rss,nice,user,time,args'
 alias fls='find . -exec ls -ld {} \";\"'
 alias more=less
+alias ifc=\"ip addr | grep -E '(,UP,| scope )'\"
 
 export EXINIT='set tabstop=4 ai'
 export PATH=/sbin
