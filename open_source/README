@@ -1,2 +1,20 @@
-All other bins & libs have been copied from their
-respective distribution CDs/DVDs
+This are the names of the source files that were downloaded
+to create executables and libraries that were not taken from
+the base distribution.
+
+We would have included the actual files themselves, but
+github *really* doesn't like you including large files
+and there is a size limit on each project.
+
+However, if you google these file names, getting the 
+original file isn't hard.
+
+bind-9.11.3.tar.gz
+busybox-1.26.2.tar.bz2
+lilo-24.2.tar.gz
+linux-4.14.13.tar.xz
+net-snmp-5.7.3.tar.gz
+openssh-7.7p1.tar.gz
+quagga-1.2.2.tar.gz
+sysvinit-2.89.tar.bz2
+util-linux-2.32-rc2.tar.xz

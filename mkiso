@@ -38,6 +38,8 @@ if test "${cmd}" = "rootfs"; then rm -f ${rootfs}; fi
 if test "${cmd}" = "clean"
 	then
 		cd ${parent}
+		umount install_os.dd_mnt >/dev/null 2>&1
+		rm -f install_os.dd install_os.dd_mnt
 		rm -rf ROOT CONFIG DATA
 		rm -f ${rootfs} ${initrd} iso/isolinux/kernel *.iso ${base}/iso/install.cfg
 		rm -f ${md5chk}

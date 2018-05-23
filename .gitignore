@@ -1,3 +1,5 @@
+install_os.dd
+install_os.dd_mnt
 mkiso.cfg
 ROOT
 CONFIG

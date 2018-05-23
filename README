@@ -1,0 +1,30 @@
+What is SlimLinux
+
+SlimLinux is a Linux server development kit for the purpose of developing small lightweight, secure
+Linux servers particularly for use in embedded environments – both for physical and virtual
+servers.
+
+SlimLinux is not a distribution, in itself, but is an operating system design that uses other Linux
+distributions as its base. This means you can copy binaries and libraries directly from the base
+distribution and they will run on your SlimLinux.
+
+Because SlimLinux is a very cut-down operating system, if you do copy binaries from other
+distributions, you may also need to copy libraries and static configuration files that are required
+to support the binary you have copied over. Our design philosophy has been to copy over as little as
+possible. All you need for a minimal Linux server is a kernel, some basic libs, and busybox – so
+that's about all you get in our base O/S.
+
+The term “server” is used to mean any Linux system that is intended to run “headless” (no
+console) with almost exclusively unattended operation.
+
+So this includes, but is not limited to, network applications (Routers, Firewalls etc), Internet
+servers (real or VM), industrial applications, automotive applications, intelligent devices, home &
+industrial automation, basically anywhere you want to be able to put in a relatively sophisticated
+network capable computer that will run continuously without the need for constant intervention.
+
+We have been running public facing internet server applications, based on SlimLinux, on Linux/KVM VM
+Host & Guest servers for some considerable time, and would expect an “uptime” of between 3 & 4
+years – i.e. running 3 to 4 years between reboots.
+
+SlimLinux enables you to run each of your server applications on a different VM instance – this
+massively improves security without being as wasteful of resources as using a full standard install.
