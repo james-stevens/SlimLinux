@@ -5,16 +5,19 @@
 
 end_cmd="$1"
 
-/sbin/killall5 -15
-sleep 5
-/sbin/killall5 -9
+dd if=/dev/urandom of=/opt/config/seed.rnd bs=512 count=1 >/dev/null 2>&1 &
 
-/sbin/swapoff -a
-/sbin/sync
-/sbin/umount -a
-/sbin/mount -v -no remount,ro /
+killall5 -15
+sleep 3
+killall5 -9
 
-/sbin/sync
+swapoff -a
+sync
+wait
+umount -a
+mount -v -no remount,ro /
+
+sync
 
 echo "Running - ${end_cmd}"
-/sbin/${end_cmd} -f
+${end_cmd} -f

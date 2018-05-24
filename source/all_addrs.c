@@ -15,6 +15,8 @@ struct in_addr ad;
 }
 
 
+
+
 int main(int argc,char * argv[])
 {
 in_addr_t addr,mask,first,last,loop;
@@ -26,6 +28,7 @@ in_addr_t addr,mask,first,last,loop;
 	last = mask ^ 0xFFFFFFFF;
 	last |= addr;
 
+	printf ("%s . ",ipchar(htonl(last-1)));
 	for(loop=first+1;loop<last;loop++) if (loop!=addr) printf ("%s . ",ipchar(htonl(loop)));
 
 	return 0;

@@ -8,8 +8,9 @@
 
 . /usr/scripts/opts
 
+conf="/etc/dns.conf"
 tmp=/tmp/make_dns_conf_$$_$RANDOM
-dst="${dnsbase}/etc/dns.conf"
+dst="${dnsbase}${conf}"
 
 {
 echo 'options {
@@ -72,6 +73,7 @@ echo '
 
      directory "/var/dns";
      allow-update { none; };
+     allow-transfer { none; };
      notify no;
      max-udp-size 4096;
      edns-udp-size 4096;
@@ -214,6 +216,7 @@ zone "hostname.as112.arpa" {
 '
 fi
 
+
 if test "${dnsWithSlave}" = "Y"
 	then
 		mkdir -p ${dnsbase}/slave
@@ -228,21 +231,52 @@ if test "${dnsWithSlave}" = "Y"
 			gsub("/","_",file);
 			gsub(":","_",file);
 
-			printf "zone \"%s\" { type slave; file \"/slave/%s\"; masters {",a[1],file
+			printf "zone \"%s\" { type slave; file \"/slave/%s\";\n\tmasters {",a[1],file
 			for(l=2;l<=n;l++) printf "%s; ",a[l]
-			print "}; };"
+			print "}; };\n"
 
 			}' ${syscfg}
 	fi
+
+
+if test "${dnsWithMaster}" = "Y"
+	then
+		mkdir -p ${dnsbase}/master
+		chown nobody: ${dnsbase}/master
+
+		awk '/^dnsMaster=/ {
+			x=substr($0,index($0,"=")+1);
+			gsub("\"","",x);
+			n=split(x,a," ");
+
+			file=a[1];
+			gsub("/","_",file);
+			gsub(":","_",file);
+
+			iplist=""; adlist="";
+			for(l=2;l<=n;l++) {
+				iplist = iplist _ a[l] _ "; "
+				if (index(a[l],"/")==0) adlist = adlist _ a[l] _ "; "
+				}
+
+			printf "zone \"%s\" { type master; notify explicit; file \"/master/%s\";\n",a[1],file
+			if (iplist!="") printf "\tallow-transfer { %s };\n",iplist
+			if (adlist!="") printf "\talso-notify { %s };\n",adlist
+			print "\t};\n"
+
+			}' ${syscfg}
+	fi
+
+
 
 } > ${tmp}
 
 mv ${tmp} ${dst}
 
 
-if ! named-checkconf -t ${dnsbase}
+if ! named-checkconf -t ${dnsbase} ${conf}
 	then
-		logger -s -t "named-checkconf" "ERROR: dns.conf failed validation checks"
+		logger -s -t "named-checkconf" "ERROR: ${conf} failed validation checks"
 	else
 		killall -q -HUP named
 	fi

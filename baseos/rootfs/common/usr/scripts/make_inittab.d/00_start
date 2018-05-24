@@ -18,6 +18,8 @@ echo "l0:0:wait:/etc/rc.d/close poweroff"
 echo "l6:6:wait:/etc/rc.d/close reboot"
 echo ""
 
+echo "hd:2345:respawn:/usr/sbin/haveged -F >/tmp/haveged.log 2>&1"
+
 if test "${allowConsoleLogin}" = "Y"
 	then
 		echo "c2:12345:respawn:/sbin/getty 38400 tty2 linux"
@@ -54,6 +56,9 @@ if test "${ntpServers}"
 	then
 		echo "ntp:345:respawn:/usr/scripts/start_ntpd"
 	fi
+
+# allow some entropy to accumulate before running sshd
+echo "wt:5:wait:/sbin/sleep 1 >/tmp/sleep.log 2>&1"
 
 if test "${runningSSHd}" = "Y"
 	then

@@ -17,11 +17,11 @@ can get you a copy - no problems.
 
 bind-9.11.3.tar.gz
 busybox-1.26.2.tar.bz2
+haveged-1.9.2.tar.gz
 lilo-24.2.tar.gz
-linux-4.14.13.tar.xz
+linux-4.14.43.tar.xz
 net-snmp-5.7.3.tar.gz
 openssh-7.7p1.tar.gz
 quagga-1.2.2.tar.gz
 sysvinit-2.89.tar.bz2
 util-linux-2.32-rc2.tar.xz
-

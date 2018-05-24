@@ -4,3 +4,5 @@
 # see License.txt for details
 
 date > /tmp/all_done.log
+dd if=/dev/urandom of=/opt/config/seed.rnd bs=512 count=1 >/dev/null 2>&1 &
+

@@ -8,6 +8,8 @@
 
 . /usr/scripts/opts
 
+first4ip=$(awk '/^4 / { print $3; exit}' /ram/addrs)
+
 tmp=/tmp/make_bgpd_conf_$$_$RANDOM
 
 {
@@ -38,14 +40,14 @@ ipv6 prefix-list AS112-v6 permit 2001:4:112::/48
 echo 'ip as-path access-list 1 permit ^$'
 echo "!
 router bgp 112
-bgp router-id ${my4addr}
+bgp router-id ${first4ip}
 network 192.175.48.0/24
 network 192.31.196.0/24
 !
 "
 else
 	echo "router bgp ${bgpMyASN}"
-	echo "bgp router-id ${my4addr}"
+	echo "bgp router-id ${first4ip}"
 fi
 
 awk 'BEGIN { bgpWithAS112="'"${bgpWithAS112}"'"; }

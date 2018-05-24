@@ -4,9 +4,12 @@
 # see License.txt for details
 
 if grep -q '^dnsSlave=' ${syscfg}; then dnsWithSlave=Y; fi
+if grep -q '^dnsMaster=' ${syscfg}; then dnsWithMaster=Y; fi
 
 dnsbase="/ram/dns"
-if test "${dnsLogging}" = "Y" -o "${dnsWithSlave}" = "Y"
+if test "${dnsLogging}" = "Y" \
+	-o "${dnsWithSlave}" = "Y" \
+	-o "${dnsWithMaster}" = "Y"
 	then
 		dnsbase="/opt/data/dns"
 	fi

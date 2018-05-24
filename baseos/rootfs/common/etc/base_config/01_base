@@ -15,8 +15,8 @@ syslogToDisk=N
 # rdateServers=
 
 sshRemoteAllow="0/0"
-icmpRemoteAllow="0/0"
 
+# pingAllow="0/0"
 firewallLogging=N
 
 keyboardMap=uk

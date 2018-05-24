@@ -1,6 +1,6 @@
 #! /bin/sh
 
-setconsole /dev/tty1
+dmesg -n 1
 tmp=/tmp/output.txt
 cfgfs=/cdrom/config.tgz
 datafs=/cdrom/data.txz
@@ -18,7 +18,6 @@ function showmsg()
 {
 	dialog --title "${title}" --infobox "\n          ${1}" 9 65
 	curtop
-	echo -en '\e[H'
 }
 
 
@@ -101,6 +100,7 @@ mount -nrt iso9660 /dev/${cdrom} /cdrom
 ls -l /cdrom/* > /dev/null 2>&1
 
 
+
 max=60
 x=1
 while ! grep -q '/cdrom' /proc/mounts
@@ -137,6 +137,15 @@ while ! grep -q /cdrom /proc/mounts
 	done
 
 
+if test -d /cdrom/random
+	then
+		{
+		hit=$(expr $(date +%s) % 10)
+		file="/cdrom/random/${hit}.rnd"
+		echo "RAND: ${file}"
+		if test -f ${file}; then cat ${file} >/dev/urandom; fi
+		} > /dev/tty4 2>&1
+	fi
 
 showmsg "Checking the Software Image File Exists"
 sleep 0.25
@@ -224,14 +233,14 @@ if test "${instype}" = "Continue" -a ! -f ${cfgfs}
 				while ! regexp "${ipexp}" "${netmask}"
 				do
 					dialog --title "${title}" --menu "Select this servers subnet mask " 15 70 7 \
-						255.255.255.252 "4 addresses"   255.255.255.248 "8 addresses" \
-						255.255.255.240 "16 addresses"  255.255.255.224 "32 addresses" \
-						255.255.255.192 "64 addresses"  255.255.255.128 "128 addresses" \
-						255.255.255.0 "256 addresses"   255.255.254.0 "512 addresses" \
-						255.255.252.0 "1024 addresses"  255.255.248.0 "2048 addresses" \
-						255.255.240.0 "4096 addresses"  255.255.224.0 "8192 addresses" \
-						255.255.192.0 "16384 addresses" 255.255.128.0 "32768 addresses" \
-						255.255.0.0 "65536 addresses" 2>${tmp}
+						30 "255.255.255.252, 4 addresses"   29 "255.255.255.248, 8 addresses" \
+						28 "255.255.255.240, 16 addresses"  27 "255.255.255.224, 32 addresses" \
+						26 "255.255.255.192, 64 addresses"  25 "255.255.255.128, 128 addresses" \
+						24 "255.255.255.0, 256 addresses"   23 "255.255.254.0, 512 addresses" \
+						22 "255.255.252.0, 1024 addresses"  21 "255.255.248.0, 2048 addresses" \
+						20 "255.255.240.0, 4096 addresses"  19 "255.255.224.0, 8192 addresses" \
+						18 "255.255.192.0, 16384 addresses" 17 "255.255.128.0, 32768 addresses" \
+						16 "255.255.0.0, 65536 addresses" 2>${tmp}
 					read netmask < ${tmp}; rm -f ${tmp}
 				done
 
@@ -307,7 +316,7 @@ sync
 if test "${instype}" = "Continue"
 	then
 		mke2fs -m 0 -q ${disk}2 >/dev/null 2>&1
-		mount -t ext2 -no nodiratime,noatime,sync ${disk}2 /mnt/opt/config
+		mount -t ext2 -no nodiratime,noatime ${disk}2 /mnt/opt/config
 
 		cd /mnt/opt/config
 		rm -rf lost+found
@@ -320,7 +329,6 @@ if test "${instype}" = "Continue"
 				{
 				cat /mnt/etc/base_config/* 
 				echo ""
-				cat /cdrom/install.cfg
 				echo ""
 
 				if test "${addrget}" = "Static"
@@ -331,6 +339,22 @@ if test "${instype}" = "Continue"
 
 				} > system.cfg
 			fi
+
+		cp /cdrom/install.cfg /mnt/opt/config
+
+		if test -d /cdrom/random
+			then
+				hit=$(expr $(date +%s) % 10)
+				file="/cdrom/random/${hit}.rnd"
+				echo "RAND: ${file}"
+				if test -f ${file}; then cp ${file} /mnt/opt/config/seed.rnd; fi
+			fi
+
+		mount -o remount,sync /mnt/opt/config
+	else
+		mount -t ext2 -no nodiratime,noatime ${disk}2 /mnt/opt/config
+		cp /cdrom/install.cfg /mnt/opt/config
+		mount -o remount,sync /mnt/opt/config
 	fi
 
 } >/dev/tty4 2>&1
@@ -347,6 +371,7 @@ if test "${instype}" = "Continue"
 				cd /mnt/opt/data
 				tar xf ${datafs}
 				sync
+				cd /
 				umount /mnt/opt/data
 				} > /dev/tty4 2>&1
 			fi
@@ -365,21 +390,17 @@ umount /mnt/dev
 umount /mnt
 umount /cdrom
 
-} >/dev/tty4 2>&1
-
-
 sync
 hdparm -f ${disk}
 sleep 0.25
 sync
 hdparm -f ${disk}
-
-
-
-
 sync
-
 eject /dev/${cdrom}
+
+} >/dev/tty4 2>&1
+
+
 
 dialog --title "${title}" \
     --msgbox "\n     Please remove the CD and Press [Enter] to Re-Boot\n" 9 65

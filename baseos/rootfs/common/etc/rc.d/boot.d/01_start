@@ -3,6 +3,8 @@
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
+dmesg -n 5
+
 mount -o noexec -t proc /proc /proc
 mount -o noexec -t sysfs /sys /sys
 mkdir /dev/pts
@@ -16,6 +18,8 @@ do
 	mkswap ${dev}
 done
 swapon -a
+
+if test -f /opt/config/seed.rnd; then cat /opt/config/seed.rnd > /dev/urandom; fi
 
 mount -t tmpfs -o noexec,size=3M /ram /ram
 cd /ram
@@ -45,4 +49,14 @@ if test "${keyboardMap}" -a -f /etc/kmap/${keyboardMap}.bmap.gz
 	fi
 zcat ${mapfile} | loadkmap
 
-awk '{ printf "\nSlimLinux - %s\n\n",substr($0,1,index($0,"(")-2); }' /proc/version > /ram/etc/motd
+if test -f /opt/config/install.cfg
+	then
+		. /opt/config/install.cfg
+		desc="${baseos}: ${overlays}"
+	else
+		desc="SlimLinux"
+	fi
+
+awk '{ 
+	printf "\n%s - Kernel v%s\n\n","'"${desc}"'",$3
+	}' /proc/version > /ram/etc/motd

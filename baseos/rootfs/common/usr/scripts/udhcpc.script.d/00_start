@@ -27,8 +27,8 @@ case ${action} in
 		echo "${interface}_router=${router}"
 		} > /ram/dhcp/${interface}
 
-		echo "4 ${ip}/${subnet} ${ip} ${subnet}" >> /ram/addrs
-		
+		echo "4 ${ip}/${mask} ${ip} ${mask}" > /ram/addrs
+
 		{
 		echo "127.0.0.1 localhost"
 		echo "${ip} ${serverHostname}"

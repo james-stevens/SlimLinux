@@ -10,3 +10,4 @@ bgpRemoteAllow=0/0
 
 bgpWithAS112=Y
 # bgpMyASN=
+# bgpPeers=

@@ -15,7 +15,7 @@ if test "${runningBGPd}" = "Y"
 				awk 'BEGIN { ipv="'"${ipv}"'" }
 				/neighbor /&&/ remote-as / {
 					ip=$2
-					if ((ipv==4)&&(index(ip,".")))||((ipv==6)&&(index(ip,":"))) {
+					if (((ipv==4)&&(index(ip,".")))||((ipv==6)&&(index(ip,":")))) {
 						printf "-A INPUT -s %s -j BGPEER\n",ip
 						printf "-A OUTPUT -d %s -j BGPEER\n",ip
 						}
@@ -27,7 +27,7 @@ if test "${runningBGPd}" = "Y"
 					gsub("\"","",x);
 					split(x,a,",");
 					ip = a[1];
-					if (((ipv==4)&&(index(ip,".")))||((ipv==6)&&(index(ip,":")))) {
+					if ((((ipv==4)&&(index(ip,".")))||((ipv==6)&&(index(ip,":"))))) {
 						printf "-A INPUT -s %s -j BGPEER\n",ip
 						printf "-A OUTPUT -d %s -j BGPEER\n",ip
 						}

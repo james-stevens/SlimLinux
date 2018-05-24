@@ -34,31 +34,34 @@ cd ${base}/rootfs
 binary="UNKNOWN"
 while ! test -d "${binary}"
 	do
-		echo "Select a binary base"; echo ""
+		echo "Select one binary base"; echo ""
 		find * -type d -mindepth 0 -maxdepth 0 -not -name common
-		echo ""; echo -n "binary base:"
+		echo ""; echo -n "Binary Base: "
 		read binary
 	done
 
 
-overlays=""; sep="";
-thisoverlay="UNKNOWN"
+overlays=""
 cd ${parent}
-while test "${thisoverlay}" = "UNKNOWN"
+while test -z "${overlays}"
 	do
-		echo "Select an overlay -> Current Overlays: ${overlays}"; echo ""
+		echo "Enter which overlays you want (space separated)"
+		echo ""
 
 		ls overlays
 
-		echo ""; echo -n "Add overlay [blank=done] :"
-		read thisoverlay
-		if test "${thisoverlay}" -a -d "overlays/${thisoverlay}"
-			then
-				overlays="${overlays}${sep}${thisoverlay}"; sep=" ";
-				thisoverlay="UNKNOWN"
-			fi
-	done
+		echo ""; echo -n "Overlays: "
+		read overlays
 
+		for ovr in ${overlays}
+		do
+			if ! test -d "overlays/${ovr}"
+				then
+					echo "ERR: could not find '${ovr}'"
+					overlays=""
+				fi
+		done
+	done
 
 {
 echo "# SlimLinux mkiso.cfg"

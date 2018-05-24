@@ -18,18 +18,21 @@ if test -d /opt/config/ssh
 		cp -a /etc/ssh/ssh_host_* /opt/config/ssh
 	fi
 
-tmp=/ram/tmp/make_sshd_config_$$_$RANDOM
-{
-if test "${allowRootSSH}" = "Y"
+if ! test -f /opt/config/ssh/sshd_config
 	then
-		echo "PermitRootLogin Yes"
-	fi
-echo "PubkeyAcceptedKeyTypes=+ssh-dss,ssh-rsa"
-} > ${tmp}
+		tmp=/ram/tmp/make_sshd_config_$$_$RANDOM
+		{
+		if test "${allowRootSSH}" = "Y"
+			then
+				echo "PermitRootLogin Yes"
+			fi
+		echo "PubkeyAcceptedKeyTypes=+ssh-dss,ssh-rsa"
+		} > ${tmp}
 
-dst=/ram/ssh/sshd_config
-chmod 400 ${tmp}
-mv ${tmp} ${dst}
-rm -f ${tmp}
+		dst=/ram/ssh/sshd_config
+		chmod 400 ${tmp}
+		mv ${tmp} ${dst}
+		rm -f ${tmp}
+	fi
 
 exec /usr/sbin/sshd -D

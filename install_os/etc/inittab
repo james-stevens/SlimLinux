@@ -10,4 +10,8 @@ si:S:sysinit:/etc/boot-up
 c2:2345:respawn:/sbin/sh < /dev/tty2 > /dev/tty2 2>/dev/tty2
 c3:2345:respawn:/sbin/sh < /dev/tty3 > /dev/tty3 2>/dev/tty3
 
+sl:2345:respawn:/sbin/syslogd -n -C100
+kl:2345:respawn:/sbin/klogd -n
+
+
 rd:5:respawn:/usr/bin/run_dialog < /dev/tty5 > /dev/tty5 2>/dev/tty5

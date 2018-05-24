@@ -41,8 +41,9 @@ if test "${cmd}" = "clean"
 		umount install_os.dd_mnt >/dev/null 2>&1
 		rm -f install_os.dd install_os.dd_mnt
 		rm -rf ROOT CONFIG DATA
-		rm -f ${rootfs} ${initrd} iso/isolinux/kernel *.iso ${base}/iso/install.cfg
+		rm -f ${rootfs} ${initrd} iso/isolinux/kernel *.iso ${isobase}/install.cfg
 		rm -f ${md5chk}
+		rm -rf ${isobase}/random
 		exit 0
 	fi
 
@@ -72,13 +73,6 @@ for ovr in ${overlays}
 
 iso="${binary}.iso"
 
-if test "${kernel}" -a -f "${parent}/kernel/${kernel}"
-	then
-		kernel="${parent}/kernel/${kernel}"
-	else
-		kernel="${parent}/kernel/kernel"
-	fi
-
 rm -f ${iso}
 
 if ! test -f ${initrd}
@@ -88,7 +82,7 @@ if ! test -f ${initrd}
 		umount install_os.dd_mnt >/dev/null 2>&1
 		rm -f install_os.dd install_os.dd_mnt
 
-		dd if=/dev/zero of=install_os.dd bs=1K count=8000 > /dev/null 2>&1
+		dd if=/dev/zero of=install_os.dd bs=1K count=8000 >/dev/null 2>&1
 		mke2fs -q -N 400 -m 0 -F install_os.dd
 		mkdir install_os.dd_mnt
 		mount -o loop install_os.dd install_os.dd_mnt
@@ -134,7 +128,8 @@ function add_depends()
 }
 
 
-function add_overlays()
+
+function capture_overlays()
 {
 	for ovr in ${overlays}
 		do
@@ -150,7 +145,12 @@ function add_overlays()
 				{ done[a[l]]="Y"; out=out _ " " _ a[l] }
 		print substr(out,2)
 		}')
+}
 
+
+
+function add_overlays()
+{
 	echo "Total overlays=${overlays}"
 
 	for ovr in ${overlays}
@@ -183,6 +183,22 @@ function add_overlays()
 		done
 }
 
+capture_overlays
+
+if test "${kernel}"
+	then
+		if ! test -f "${parent}/kernel/${kernel}"
+			then
+				echo "ERROR: kernel '${kernel}' not found"
+				ls -l ${parent}/kernel/${kernel}
+				exit 0
+			fi
+		kernel="${parent}/kernel/${kernel}"
+	else
+		kernel="${parent}/kernel/kernel"
+	fi
+
+echo "KERNEL: ${kernel}"
 
 
 if ! test -f ${rootfs}
@@ -225,6 +241,18 @@ if ! test -f ${rootfs}
 				cd ${parent}/DATA
 				tar Jcf ${datafs} .
 			fi
+	fi
+
+
+
+
+if ! test -d ${isobase}/random
+	then
+		mkdir ${isobase}/random
+		for x in 0 1 2 3 4 5 6 7 8 9
+		do
+			dd if=/dev/urandom of=${isobase}/random/${x}.rnd bs=1 count=512 >/dev/null 2>&1
+		done
 	fi
 
 
