@@ -5,7 +5,7 @@ SlimLinux - A Micro-Linux for building IoT & Embedded Applications
 SlimLinux is a Linux server development kit for the purpose of
 developing small lightweight, secure Linux based network-aware 
 embedded applications – both physical & virtual. The base 
-installation takes 16Mb of disk space and uses 20Mb of RAM to run.
+installation takes 16Mb of disk space and uses 18.5Mb of RAM to run.
 
 An “embedded application” means any Linux system that is intended 
 to run “headless” (no standard UI) with almost exclusively

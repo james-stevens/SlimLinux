@@ -10,6 +10,9 @@ all: $(TARGETS)
 clean:
 	rm -f $(TARGETS)
 
+strip:
+	strip -p $(TARGETS)
+
 install:
 	strip -p $(TARGETS)
 	$(INSTALL_CMD) $(TARGETS) ../install_os/sbin
