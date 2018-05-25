@@ -1,2 +1,2 @@
-JRCS Slim-Linux ISO Installer
+Slim-Linux ISO Installer
 
