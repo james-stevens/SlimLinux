@@ -58,7 +58,7 @@ if test "${ntpServers}"
 	fi
 
 # allow some entropy to accumulate before running sshd
-echo "wt:5:wait:/sbin/sleep 1 >/tmp/sleep.log 2>&1"
+echo "wt:345:wait:/sbin/sleep 0.5"
 
 if test "${runningSSHd}" = "Y"
 	then

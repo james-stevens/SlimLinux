@@ -53,6 +53,7 @@ security without being as wasteful of resources as using a full
 standard install.
 
 
+
 Getting Started
 ===============
 
@@ -61,8 +62,44 @@ $ cd SlimLinux
 $ ./configure
 $ make
 
-This will make a bootable ISO that will install the options you
-have chosen.
+This will create a bootable ISO that, when booted in a target machine,
+will install the SlimLinux, with the options you have chosen.
 
 If you are not sure what to do with an ISO image, I recommend you
 google "boot iso image".
+
+The ISO image is "hybrid", which means it should boot from either
+a CD/DVD (real or virtual) or a USB stick.
+
+
+If you change the "mkiso.cfg" file, or run "./configure" again, you
+then need to run :-
+
+$ make clean all
+
+
+The "configure" utility checks you have the programs "mkisofs" and
+"isohybrid" that are needed for creating the ISO. If you do not have
+these you will have to refer to your documentation to add them.
+
+Or google "add mkisofo <name>" - where "<name>" is the name of the
+operating system you are using.
+
+
+
+Make Options
+===========
+
+clean  - remove all files, other than those brought in by "git"
+all    - make all files needed by the ISO and the ISO itself
+rootfs - remove and recreate the operating install file & ISO
+initrd - remove and recreate the installation O/S & ISO
+config - remove "mkiso.cfg", and rerun "configure" & "make all"
+
+
+if you do not have "make" on your system, then
+
+$ ./mkiso <option>
+
+will pretty much do the same thing.
+

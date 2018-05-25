@@ -27,6 +27,7 @@ if test "${cmd}" = "--help" -o "${cmd}" = "-h"
 		echo "clean  = remove rootfs.txz & initrd.img and exit"
 		echo "initrd = re-make initrd.img"
 		echo "rootfs = re-make rootfs.txz"
+		echo "config = clean and re-run the configure utility"
 		exit 0
 	fi
 
@@ -35,7 +36,7 @@ if test "${cmd}" = "initrd"; then rm -f ${initrd}; fi
 
 if test "${cmd}" = "rootfs"; then rm -f ${rootfs}; fi
 
-if test "${cmd}" = "clean"
+if test "${cmd}" = "clean" -o "${cmd}" = "config"
 	then
 		cd ${parent}
 		umount install_os.dd_mnt >/dev/null 2>&1
@@ -44,6 +45,10 @@ if test "${cmd}" = "clean"
 		rm -f ${rootfs} ${initrd} iso/isolinux/kernel *.iso ${isobase}/install.cfg
 		rm -f ${md5chk}
 		rm -rf ${isobase}/random
+		if test "${cmd}" = "config"
+			then
+				./configure
+			fi
 		exit 0
 	fi
 
@@ -155,6 +160,12 @@ function add_overlays()
 
 	for ovr in ${overlays}
 		do
+		file="${parent}/overlays/${ovr}/sfdisk.cfg"
+		if test -f ${file}
+			then
+				cp ${file} ${isobase}
+			fi
+
 		d="${parent}/overlays/${ovr}/data/"
 		if test -d "${d}"
 			then

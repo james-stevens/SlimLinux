@@ -3,6 +3,8 @@
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
-date > /tmp/all_done.log
 dd if=/dev/urandom of=/opt/config/seed.rnd bs=512 count=1 >/dev/null 2>&1 &
 
+rm -f /ram/just-booted
+wait
+date > /tmp/all_done.log

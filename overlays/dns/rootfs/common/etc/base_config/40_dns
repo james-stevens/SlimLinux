@@ -16,5 +16,5 @@ firewallBlockResp=Y
 dnsRndcKey=HJwviyb/QQGvY/07Pqq0zQ==
 dnsRndcAllow=0/0
 
-# dnsSlave="zone master master ..."
-# dnsMaster="zone"
+# dnsSecondary="zone master master ..."
+# dnsPrimary="zone"

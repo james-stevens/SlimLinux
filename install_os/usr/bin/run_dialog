@@ -258,9 +258,9 @@ if test "${instype}" = "Continue"
 	then
 		showmsg "Partitioning the Hard Disk"
 
-		if test -f /cdrom/partition.cfg
+		if test -f /cdrom/sfdisk.cfg
 			then
-				cat /cdrom/partition.cfg | sfdisk -q ${disk} >/dev/tty4 2>&1
+				cat /cdrom/sfdisk.cfg | sfdisk -q ${disk} >/dev/tty4 2>&1
 			else
 				{
 				echo "label: gpt"
@@ -340,14 +340,17 @@ if test "${instype}" = "Continue"
 				} > system.cfg
 			fi
 
-		cp /cdrom/install.cfg /mnt/opt/config
+		chown 0:0 system.cfg
+		chmod 600 system.cfg
+
+		cp /cdrom/install.cfg .
 
 		if test -d /cdrom/random
 			then
 				hit=$(expr $(date +%s) % 10)
 				file="/cdrom/random/${hit}.rnd"
 				echo "RAND: ${file}"
-				if test -f ${file}; then cp ${file} /mnt/opt/config/seed.rnd; fi
+				if test -f ${file}; then cp ${file} seed.rnd; fi
 			fi
 
 		mount -o remount,sync /mnt/opt/config
@@ -377,7 +380,7 @@ if test "${instype}" = "Continue"
 			fi
 	fi
 
-showmsg "Installation Complete"
+showmsg "Installation Complete - Flushing Disk"
 
 {
 sync

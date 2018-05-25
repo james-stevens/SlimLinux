@@ -89,10 +89,10 @@ if test "${dnsDNSSEC}" = "Y"
 if test "${dnsResolver}" = "Y"
 	then
 	     echo "    recursion yes;"
-	     if test "${resolverAllowed}"
+	     if test "${dnsResolverAllowed}"
 	     	then
 	     		echo -n "    allow-recursion { 127.0.0.0/8; ::1; "
-	     		for svr in ${resolverAllowed}
+	     		for svr in ${dnsResolverAllowed}
 	     		do	
 	     			echo -n "${svr}; "
 	     		done
@@ -217,12 +217,12 @@ zone "hostname.as112.arpa" {
 fi
 
 
-if test "${dnsWithSlave}" = "Y"
+if test "${dnsWithSecondary}" = "Y"
 	then
 		mkdir -p ${dnsbase}/slave
 		chown nobody: ${dnsbase}/slave
 
-		awk '/^dnsSlave=/ {
+		awk '/^dnsSecondary=/ {
 			x=substr($0,index($0,"=")+1);
 			gsub("\"","",x);
 			n=split(x,a," ");
@@ -239,12 +239,12 @@ if test "${dnsWithSlave}" = "Y"
 	fi
 
 
-if test "${dnsWithMaster}" = "Y"
+if test "${dnsWithPrimary}" = "Y"
 	then
 		mkdir -p ${dnsbase}/master
 		chown nobody: ${dnsbase}/master
 
-		awk '/^dnsMaster=/ {
+		awk '/^dnsPrimary=/ {
 			x=substr($0,index($0,"=")+1);
 			gsub("\"","",x);
 			n=split(x,a," ");

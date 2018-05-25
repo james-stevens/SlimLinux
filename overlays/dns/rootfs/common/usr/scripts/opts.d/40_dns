@@ -3,14 +3,16 @@
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
-if grep -q '^dnsSlave=' ${syscfg}; then dnsWithSlave=Y; fi
-if grep -q '^dnsMaster=' ${syscfg}; then dnsWithMaster=Y; fi
+if grep -q '^dnsSecondary=' ${syscfg}; then dnsWithSecondary=Y; fi
+if grep -q '^dnsPrimary=' ${syscfg}; then dnsWithPrimary=Y; fi
 
+dnscp="cp"
 dnsbase="/ram/dns"
 if test "${dnsLogging}" = "Y" \
-	-o "${dnsWithSlave}" = "Y" \
-	-o "${dnsWithMaster}" = "Y"
+	-o "${dnsWithSecondary}" = "Y" \
+	-o "${dnsWithPrimary}" = "Y"
 	then
 		dnsbase="/opt/data/dns"
+		dnscp="ln"
 	fi
 

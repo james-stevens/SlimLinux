@@ -16,12 +16,12 @@ clean:
 rootfs: mkiso.cfg
 	sh mkiso rootfs
 
-initrd: mkiso.cfg
+initrd: mkiso.cfg iso/isolinux/initrd.img
 	sh mkiso initrd
 
 config:
 	rm -f mkiso.cfg
 	./configure
-	sh -c "make all"
+	sh -c "make clean all"
 
 mkiso.cfg: ./configure

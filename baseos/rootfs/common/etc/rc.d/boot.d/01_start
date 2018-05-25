@@ -28,10 +28,15 @@ chmod 777 run tmp
 chmod +t run tmp
 touch etc/adjtime
 
+chown 0:0 /opt/config/system.cfg /ram/ssh /ram/root
+chmod 600 /opt/config/system.cfg /ram/ssh /ram/root
+
+touch /ram/just-booted
+
 mkdir -m 700 root/.ssh
 /usr/scripts/make_auth_keys
 
-ifconfig lo 127.0.0.1
+ip link set lo up
 
 mkdir -p /opt/data/log
 touch /var/log/lastlog /var/log/wtmp
@@ -58,5 +63,5 @@ if test -f /opt/config/install.cfg
 	fi
 
 awk '{ 
-	printf "\n%s - Kernel v%s\n\n","'"${desc}"'",$3
+	printf "\n%s\nKernel v%s\n\n","'"${desc}"'",$3
 	}' /proc/version > /ram/etc/motd

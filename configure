@@ -41,16 +41,16 @@ while ! test -d "${binary}"
 	done
 
 
-overlays=""
+overlays="NONE"
 cd ${parent}
-while test -z "${overlays}"
+while test "${overlays}" = "NONE"
 	do
 		echo "Enter which overlays you want (space separated)"
 		echo ""
 
 		ls overlays
 
-		echo ""; echo -n "Overlays: "
+		echo ""; echo -n "Overlays [blank=none]: "
 		read overlays
 
 		for ovr in ${overlays}
@@ -58,7 +58,7 @@ while test -z "${overlays}"
 			if ! test -d "overlays/${ovr}"
 				then
 					echo "ERR: could not find '${ovr}'"
-					overlays=""
+					overlays="NONE"
 				fi
 		done
 	done

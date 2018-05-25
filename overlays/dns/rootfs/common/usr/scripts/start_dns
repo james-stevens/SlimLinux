@@ -30,7 +30,7 @@ if test "${dnsWithAS112}" = "Y"
 conf="/etc/dns.conf"
 if test -f /opt/config/dns.conf
 	then
-		cp /opt/config/dns.conf ${dnsbase}${conf}
+		${dnscp} /opt/config/dns.conf ${dnsbase}${conf}
 		chown nobody: ${dnsbase}${conf}
 	else
 		/usr/scripts/make_dns_conf
