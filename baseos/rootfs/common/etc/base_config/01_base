@@ -12,6 +12,7 @@ syslogToDisk=N
 # syslogSize=
 
 # ntpServers=
+# ntpAllow=
 # rdateServers=
 
 sshRemoteAllow="0/0"

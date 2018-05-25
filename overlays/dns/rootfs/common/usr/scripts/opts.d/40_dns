@@ -13,6 +13,5 @@ if test "${dnsLogging}" = "Y" \
 	-o "${dnsWithPrimary}" = "Y"
 	then
 		dnsbase="/opt/data/dns"
-		dnscp="ln"
 	fi
 

@@ -10,4 +10,7 @@ do
 	echo "server ${svr}"
 done > /ram/etc/ntp.conf
 
-exec /sbin/ntpd -nN
+flags="-nN"
+if test "${ntpAllow}"; then flags="-lnN"; fi
+
+exec /sbin/ntpd ${flags}
