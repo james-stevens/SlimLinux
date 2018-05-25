@@ -230,7 +230,7 @@ if test "${instype}" = "Continue" -a ! -f ${cfgfs}
 					read ipaddr < ${tmp}; rm -f ${tmp}
 				done
 
-				while ! regexp "${ipexp}" "${netmask}"
+				while ! regexp "^[123]?[0-9]$" "${netmask}"
 				do
 					dialog --title "${title}" --menu "Select this servers subnet mask " 15 70 7 \
 						30 "255.255.255.252, 4 addresses"   29 "255.255.255.248, 8 addresses" \
