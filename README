@@ -3,12 +3,12 @@ SlimLinux - A Micro-Linux for building IoT & Embedded Applications
 ==================================================================
 
 SlimLinux is a Linux server development kit for the purpose of
-developing small lightweight, secure Linux based embedded
-applications – both physical & virtual. The base installation
-takes 16Mb of disk space and uses 20Mb of RAM to run.
+developing small lightweight, secure Linux based network-aware 
+embedded applications – both physical & virtual. The base 
+installation takes 16Mb of disk space and uses 20Mb of RAM to run.
 
-An “embedded application” means any Linux system that is
-intended to run “headless” (no screen) with almost exclusively
+An “embedded application” means any Linux system that is intended 
+to run “headless” (no standard UI) with almost exclusively
 unattended operation. So this includes, but is not limited to, IoT,
 network applications (Routers, Firewalls etc), Internet servers
 (real or VM), industrial applications, automotive applications,
@@ -35,17 +35,34 @@ Current binary base distributions supported are
 	Slackware x64 v14.2
 	Redhat x64 v7.5
 
-We have been running public facing internet server applications,
-based on Slackware SlimLinux, on both physical & virtual servers
-for over 10 years, and would expect an “uptime” of between 3 &
-4 years – i.e. running 3 to 4 years between reboots.
-Because it is so small, SlimLinux enables you to run each of your
-server applications on a different VM instance – this massively
-improves security without being as wasteful of resources as using a
-full standard install.
-
 When you look at the “Redhat” or “Slackware” SlimLinux you
-will not see is an operating system that looks like what it is
+will not see an operating system that looks like the one it is
 based on. The base gives the SlimLinux full binary compatibility
 with the base, but the structure of the system and what utilities
 are available will be different.
+
+We have been running public facing internet server applications,
+based on Slackware SlimLinux, on both physical & virtual servers
+for over 15 years, and would expect an “uptime” of between 3 &
+4 years – i.e. running 3 to 4 years between reboots.
+
+Because SlimLinux is so small, it enables you to run each of your
+server applications on a different physical or virtual machine –
+a technique called “network appliance” – this improves
+security without being as wasteful of resources as using a full
+standard install.
+
+
+Getting Started
+===============
+
+$ git clone https://github.com/james-stevens/SlimLinux.git
+$ cd SlimLinux
+$ ./configure
+$ make
+
+This will make a bootable ISO that will install the options you
+have chosen.
+
+If you are not sure what to do with an ISO image, I recommend you
+google "boot iso image".

@@ -77,4 +77,5 @@ cat ${cfg}
 echo "=================== mkiso.cfg ========================"
 echo ""
 
-make clean all
+echo ""
+echo "Now run 'make'"
