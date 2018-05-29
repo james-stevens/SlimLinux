@@ -1,5 +1,10 @@
 #! /bin/bash
 
+parent="$PWD"
+
+base="${parent}/baseos"
+cfg=${parent}/mkiso.cfg
+
 uid=$(id -u)
 if ! test "${uid}" = "0"
     then
@@ -8,14 +13,24 @@ if ! test "${uid}" = "0"
         echo "Becuase you are not UID=0 (root), I will need to use 'sudo'"
         echo ""
         echo "***********************************************************"
-        sudo ./mkiso $*
+        sudo ./mkiso -u $*
+
+		. ${cfg}
+		iso="${binary}.iso"
+		if test "${upload_ip}" -a "${upload_dir}"
+			then
+				tar cf - ${iso} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
+			fi
+
         exit 0
     fi
 
-parent="$PWD"
+if test "$1" = "-u"
+	then
+		with_sudo="Y"
+		shift
+	fi
 
-base="${parent}/baseos"
-cfg=${parent}/mkiso.cfg
 isobase=${parent}/iso
 
 rootfs=${isobase}/rootfs.txz 
@@ -311,7 +326,7 @@ chown --reference=LICENSE ${iso}
 
 du -h ${iso}
 
-if test "${upload_ip}" -a "${upload_dir}"
+if test "${upload_ip}" -a "${upload_dir}" -a -z "${with_sudo}"
 	then
 		tar cf - ${iso} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
 	fi
