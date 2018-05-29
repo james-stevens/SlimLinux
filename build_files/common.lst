@@ -1,4 +1,5 @@
 common/sbin
+slackware_x64_v14.2/sbin/ldconfig
 slackware_x64_v14.2/sbin/busybox
 slackware_x64_v14.2/sbin/init
 slackware_x64_v14.2/sbin/e2fsck
