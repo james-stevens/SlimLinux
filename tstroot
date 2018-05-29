@@ -1,4 +1,16 @@
-#! /bin/sh
+#! /bin/bash
+
+uid=$(id -u)
+if ! test "${uid}" = "0"
+    then
+        echo "***********************************************************"
+        echo ""
+        echo "Becuase you are not UID=0 (root), I will need to use 'sudo'"
+        echo ""
+        echo "***********************************************************"
+        sudo ./tstroot $*
+        exit 0
+    fi
 
 mount -o noexec -t devtmpfs dev ROOT/dev
 mount -o noexec -t proc proc ROOT/proc
