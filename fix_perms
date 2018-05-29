@@ -13,10 +13,20 @@ find . -type d -exec chmod 755 {} ';'
 
 chmod 555 lib64/*
 
-for dir in etc/rc.d sbin usr/sbin usr/lib64/xtables usr/scripts etc/acpi
+for dir in etc/rc.d sbin usr/sbin usr/bin usr/lib64/xtables usr/scripts etc/acpi
 do
 	find ${dir} -type f -exec chmod 555 {} ';'
 done
 
 chmod +s sbin/su
 chmod 400 boot/kernel
+
+cd ..
+if test -d CONFIG
+	then
+		cd CONFIG
+		chown -R 0:0 .
+		find . -type f -exec chmod 644 {} ';'
+		find . -type d -exec chmod 755 {} ';'
+		chmod 600 system.cfg 2>/dev/null
+	fi
