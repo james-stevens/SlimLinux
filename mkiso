@@ -71,9 +71,9 @@ if test "${cmd}" = "clean" -o "${cmd}" = "config"
 	then
 		cd ${parent}
 		umount install_os.dd_mnt >/dev/null 2>&1
-		rm -f install_os.dd
+		rm -f install_os.dd output/*
 		rm -rf ROOT CONFIG DATA install_os.dd_mnt
-		rm -f ${rootfs} ${initrd} iso/isolinux/kernel *.iso ${isobase}/install.cfg
+		rm -f ${rootfs} ${initrd} iso/isolinux/kernel ${isobase}/install.cfg
 		rm -f ${md5chk}
 		rm -rf ${isobase}/random
 		if test "${cmd}" = "config"
@@ -378,6 +378,8 @@ cd ${parent}
 isohybrid ${iso}
 
 chown --reference=LICENSE ${iso}
+
+echo "isofile=\"${iso}\"" > ${output}/iso.cfg
 
 du -h ${iso}
 

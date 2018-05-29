@@ -1,0 +1,45 @@
+#! /bin/sh
+
+
+if ! test -f output/iso.cfg
+	then
+		echo "ERROR: Can't find the 'output/iso.cfg' file - try running 'make clean all'"
+		exit 0
+	fi
+
+. output/iso.cfg
+
+if ! test -f "${isofile}"
+	then
+		echo "ERROR: Can't find the ISO image - try running 'make clean all'"
+		exit 0
+	fi
+
+opt="$1"
+
+function burn_dvd()
+{
+	for cmd in xfburn cdrecord
+	do
+		if ${cmd} --help >/dev/null 2>&1
+			then
+				burn_cmd="${cmd}"
+				if "${burn_cmd}" = "xfburn"; then args="-i"; fi
+				if "${burn_cmd}" = "cdrecord"; then args="-tao"; fi
+			fi
+	done
+
+
+	if test -z "${burn_cmd}"
+		then
+			echo "ERROR: Could not find a supported burn command"
+			exit 0
+		fi
+
+	${burn_cmd} ${args} ${isofile}
+	exit 0
+}
+
+
+
+burn_${opt}
