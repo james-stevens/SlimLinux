@@ -64,6 +64,7 @@ if test "${cmd}" = "clean" -o "${cmd}" = "config"
 		exit 0
 	fi
 
+./fix_perms > /dev/null 2>&1
 
 if ! test -f ${cfg}; then sh configure; fi
 

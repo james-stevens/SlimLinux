@@ -1,0 +1,17 @@
+#! /bin/bash
+
+chown -R 0:0 baseos overlays
+find baseos overlays -type f -exec chmod 644 {} ';'
+
+chmod 555 baseos/rootfs/*/lib64/*
+chmod 555 overlays/*/rootfs/*/lib64/*
+
+
+for dir in etc/rc.d sbin usr/sbin usr/lib64/xtables usr/scripts
+do
+	find baseos/rootfs/*/${dir}/. overlays/*/rootfs/*/${dir}/. -type f -exec chmod 555 {} ';'
+done
+
+find baseos overlays -type d -exec chmod 755 {} ';'
+
+chmod +s baseos/rootfs/*/sbin/su
