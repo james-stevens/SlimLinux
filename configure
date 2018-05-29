@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 parent="$PWD"
 
@@ -9,13 +9,13 @@ rootfs=${isobase}/rootfs.txz
 initrd=${isobase}/isolinux/initrd.img
 md5chk=${isobase}/chk.md5
 
-if ! mkisofs --version | grep -q Copyright
+if ! mkisofs --help >/dev/null 2>&1
     then
         echo "ERROR: Test run of 'mkisofs' failed"
         exit 0
     fi
 
-if ! isohybrid --help 2>&1 | grep -q Options
+if ! isohybrid --help 2>&1
     then
         echo "ERROR: Test run of 'isohybrid' failed"
         exit 0
@@ -35,7 +35,7 @@ binary="UNKNOWN"
 while ! test -d "${binary}"
 	do
 		echo "Select one binary base"; echo ""
-		find * -type d -mindepth 0 -maxdepth 0 -not -name common
+		find * -mindepth 0 -maxdepth 0 -type d -not -name common
 		echo ""; echo -n "Binary Base: "
 		read binary
 	done

@@ -1,5 +1,17 @@
 #! /bin/sh
 
+uid=$(id -u)
+if ! test "${uid}" = "0"
+    then
+        echo "***********************************************************"
+        echo ""
+        echo "Becuase you are not UID=0 (root), I will need to use 'sudo'"
+        echo ""
+        echo "***********************************************************"
+        sudo ./mkiso $*
+        exit 0
+    fi
+
 parent="$PWD"
 
 base="${parent}/baseos"
@@ -40,8 +52,8 @@ if test "${cmd}" = "clean" -o "${cmd}" = "config"
 	then
 		cd ${parent}
 		umount install_os.dd_mnt >/dev/null 2>&1
-		rm -f install_os.dd install_os.dd_mnt
-		rm -rf ROOT CONFIG DATA
+		rm -f install_os.dd
+		rm -rf ROOT CONFIG DATA install_os.dd_mnt
 		rm -f ${rootfs} ${initrd} iso/isolinux/kernel *.iso ${isobase}/install.cfg
 		rm -f ${md5chk}
 		rm -rf ${isobase}/random
