@@ -17,7 +17,7 @@ if ! test "${uid}" = "0"
 
 		. ${cfg}
 		iso="${binary}.iso"
-		if test "${upload_ip}" -a "${upload_dir}"
+		if test "${upload_ip}" -a "${upload_dir}" -a -f "${iso}"
 			then
 				tar cf - ${iso} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
 			fi
@@ -153,6 +153,34 @@ if ! test -f ${initrd}
 
 
 
+function fix_os_perms()
+{
+	cd ${parent}/ROOT
+	chown -R 0:0 .
+	find . -type f -exec chmod 644 {} ';'
+	find . -type d -exec chmod 755 {} ';'
+
+	for dir in lib64 etc/rc.d sbin usr/sbin usr/bin usr/lib64/xtables usr/scripts etc/acpi
+	do
+		find ${dir} -type f -exec chmod 555 {} ';'
+	done
+
+	chmod +s sbin/su
+	chmod 400 boot/kernel
+
+	cd ${parent}
+	if test -d CONFIG
+		then
+			cd CONFIG
+			chown -R 0:0 .
+			find . -type f -exec chmod 644 {} ';'
+			find . -type d -exec chmod 755 {} ';'
+			chmod 600 system.cfg 2>/dev/null
+		fi
+}
+
+
+
 function add_depends()
 {
 	ovr=$1
@@ -213,6 +241,8 @@ function add_overlays()
 				echo "- Adding data: ${ovr}/data"
 				mkdir -p ${parent}/DATA
 				cd ${d}; cp -a . ${parent}/DATA
+				chown 0:0 ${parent}/DATA
+				chmod 755 ${parent}/DATA
 			fi
 
 		d="${parent}/overlays/${ovr}/config/"
@@ -277,9 +307,14 @@ if ! test -f ${rootfs}
 		cd ${parent}
 		du -sh ROOT
 
-		./fix_perms > /dev/null 2>&1
+		fix_os_perms
+		for ovr in ${overlays}
+		do
+			cd ${parent}
+			if test -f overlays/${ovr}/fix_perms; then . overlays/${ovr}/fix_perms; fi
+		done
 
-		cd ROOT
+		cd ${parent}/ROOT
 		echo "- compressing ROOT file system"
 		tar Jcf ${rootfs} .
 		du -sh ${rootfs}
