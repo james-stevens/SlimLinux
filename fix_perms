@@ -1,17 +1,21 @@
 #! /bin/bash
 
-chown -R 0:0 baseos overlays
-find baseos overlays -type f -exec chmod 644 {} ';'
+if ! test -d ROOT
+	then
+		echo "ERROR: 'ROOT' does not exist"
+		exit 0
+	fi
 
-chmod 555 baseos/rootfs/*/lib64/*
-chmod 555 overlays/*/rootfs/*/lib64/*
+cd ROOT
+chown -R 0:0 .
+find . -type f -exec chmod 644 {} ';'
+find . -type d -exec chmod 755 {} ';'
 
+chmod 555 lib64/*
 
 for dir in etc/rc.d sbin usr/sbin usr/lib64/xtables usr/scripts etc/acpi
 do
-	find baseos/rootfs/*/${dir}/. overlays/*/rootfs/*/${dir}/. -type f -exec chmod 555 {} ';'
+	find ${dir} -type f -exec chmod 555 {} ';'
 done
-
-find baseos overlays -type d -exec chmod 755 {} ';'
 
 chmod +s baseos/rootfs/*/sbin/su
