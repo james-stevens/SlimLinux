@@ -307,6 +307,8 @@ rm -f ${isobase}/isolinux/kernel
 cd ${parent}
 isohybrid ${iso}
 
+chown --reference=LICENSE ${iso}
+
 du -h ${iso}
 
 if test "${upload_ip}" -a "${upload_dir}"
