@@ -4,6 +4,8 @@ parent="$PWD"
 
 base="${parent}/baseos"
 cfg=${parent}/mkiso.cfg
+output="${parent}/output"
+mkdir -p ${output}
 
 uid=$(id -u)
 if ! test "${uid}" = "0"
@@ -16,10 +18,12 @@ if ! test "${uid}" = "0"
         sudo ./mkiso -u $*
 
 		. ${cfg}
-		iso="${binary}.iso"
+		isofile="${binary}.iso"
+		iso="${output}/${isofile}"
 		if test "${upload_ip}" -a "${upload_dir}" -a -f "${iso}"
 			then
-				tar cf - ${iso} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
+				cd ${output}
+				tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
 			fi
 
         exit 0
@@ -102,7 +106,8 @@ for ovr in ${overlays}
 	done
 
 
-iso="${binary}.iso"
+isofile="${binary}.iso"
+iso="${output}/${isofile}"
 
 rm -f ${iso}
 
@@ -125,7 +130,7 @@ if ! test -f ${initrd}
 		cp -a . ${parent}/install_os.dd_mnt
 
 		cd ${parent}/install_os.dd_mnt
-		mkdir dev tmp mnt proc cdrom
+		mkdir dev tmp mnt proc cdrom sys
 
 		chown -R 0:0 .
 		find . -type f -exec chmod 644 {} ';'
@@ -360,7 +365,7 @@ cd ${isobase}
 md5sum $(find -type f -not -name chk.md5) > ${md5chk}
 
 
-mkisofs -quiet -o ${parent}/${iso} \
+mkisofs -quiet -o ${iso} \
 	-b isolinux/isolinux.bin \
 	-c isolinux/boot.cat \
 	-no-emul-boot -boot-load-size 4 \
@@ -378,5 +383,24 @@ du -h ${iso}
 
 if test "${upload_ip}" -a "${upload_dir}" -a -z "${with_sudo}"
 	then
-		tar cf - ${iso} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
+		cd ${output}
+		tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
 	fi
+
+echo ""
+echo "============================ Options ==================================="
+echo ""
+echo "make dvd             ... burn ISO image to a CD/DVD disk"
+echo "make usb             ... copy the ISO installer to a USB stick"
+echo ""
+echo "make livedvd         ... make a bootable liveCD and burn to disk"
+echo "make liveusb         ... make a live USB stick (O/S is fixed)"
+echo "                         (config is fixed at create time)"
+echo "                         (user data is stored in RAM)"
+echo ""
+echo "make bootusb         ... install SlimLinux on a USB stick to boot & run"
+echo "                         (config can be modified)"
+echo "                         (user data is stored on USB)"
+echo ""
+echo "============================ Options ==================================="
+echo ""

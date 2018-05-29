@@ -7,6 +7,7 @@ mount -rno remount /
 echo "Running boot-script"
 
 mount -nt proc /proc /proc
+mount -nt sysfs /sys /sys
 mount -t tmpfs -no size=3M /tmp /tmp
 
 hostname install.zz.
