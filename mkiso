@@ -243,12 +243,13 @@ if ! test -f ${rootfs}
 		if test "${overlays}"; then add_overlays; fi
 
 		cp ${kernel} ${parent}/ROOT/boot/kernel
-		chmod 400 ${parent}/ROOT/boot/kernel
 
 		cd ${parent}
 		du -sh ROOT
-		cd ROOT
+
 		./fix_perms > /dev/null 2>&1
+
+		cd ROOT
 		echo "- compressing ROOT file system"
 		tar Jcf ${rootfs} .
 		du -sh ${rootfs}
