@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 
 if ! test -f output/iso.cfg
@@ -17,29 +17,95 @@ if ! test -f "${isofile}"
 
 opt="$1"
 
+
+
 function burn_dvd()
 {
 	for cmd in xfburn cdrecord
 	do
 		if ${cmd} --help >/dev/null 2>&1
 			then
-				burn_cmd="${cmd}"
-				if "${burn_cmd}" = "xfburn"; then args="-i"; fi
-				if "${burn_cmd}" = "cdrecord"; then args="-tao"; fi
+				if test "${cmd}" = "xfburn"; then burn_run="${cmd} -i ${isofile}"; fi
+				if test "${cmd}" = "cdrecord"; then burn_run="${cmd} -tao ${isofile}"; fi
+				break;
 			fi
 	done
 
 
-	if test -z "${burn_cmd}"
+	if test -z "${burn_run}"
 		then
 			echo "ERROR: Could not find a supported burn command"
 			exit 0
 		fi
 
-	${burn_cmd} ${args} ${isofile}
+	${burn_run}
 	exit 0
 }
 
 
 
-burn_${opt}
+function choose_usb()
+{
+	echo ""
+	echo "Select a USB drive:-"
+	echo "(only USB drives *not* in use are listed)"
+	echo ""
+	usb=""; sep=""
+	for disk in $(ls -l /sys/block/ | awk '/\/usb/ { if (index($9,"sd")==1) print $9 }')
+	do 
+		if ! grep -qE "^/dev/${disk}[0-9] " /proc/mounts
+			then
+				usb="${usb}${sep}${disk}"; sep=" ";
+			fi
+	done
+	for d in ${usb}
+	do
+		name=$(cat /sys/block/${d}/device/model)
+		size=$(awk '{ printf "%.1fGb",int($0)*512/1000000000 }' /sys/block/${d}/size)
+		echo "${d} - ${name} ${size}"
+	done
+	echo ""
+	echo -n "Enter drive name (${usb}): "
+	read disk
+}
+
+
+
+
+function burn_usb()
+{
+	choose_usb
+	if ! test -f /sys/block/${disk}/size
+		then
+			echo "ERROR: No USB disk chosen"
+			exit 0
+		fi
+	uid=$(id -u)
+	if ! test "${uid}" = "0"
+	    then
+			echo "========= need 'root' access to burn USB stick ========="
+			with_sudo="sudo"
+		fi
+	${with_sudo} dd if=${isofile} of=/dev/${disk} bs=1K
+	${with_sudo} hdparm -f /dev/${disk}
+	${with_sudo} hdparm -z /dev/${disk}
+
+	echo ""
+	echo "=========================="
+	echo "USB stick is ready to boot"
+	echo "=========================="
+	echo ""
+}
+
+
+if test -z "${opt}"
+	then
+		echo "ERROR: you must supply a command line option from - dvd"
+		exit 0
+	fi
+
+case ${opt} in
+	dvd) burn_dvd ;;
+	usb) burn_usb;;
+	*) echo "ERROR: unsupported option '${opt}'" ;;
+esac
