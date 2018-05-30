@@ -38,6 +38,26 @@ if udisksctl help >/dev/null 2>&1
 
 function burn_dvd()
 {
+	if test -f /proc/sys/dev/cdrom/info
+		then
+			cdrom="/dev/$(awk '/drive name:/ { print $NF }' /proc/sys/dev/cdrom/info)"
+			can_write="$(awk '/^Can write (CD|DVD)-/ { tot += int($NF) } 
+				END { if (tot>0) print "Y"; else print "N" }' /proc/sys/dev/cdrom/info)"
+		fi
+
+	if ! test "${cdrom}" -a -b "${cdrom}"
+		then
+			echo "ERROR: unable to find a CD/DVD drive in this machine"
+			exit 0
+		else
+			if ! test "${can_write}" = "Y"
+				then
+					echo "ERROR: Your CD/DVD drive can't write disks"
+					exit 0
+				fi
+		fi
+
+
 	echo ""; echo -n "Insert a writeable disk you want to burn and press [Enter] :"; read x
 
 	for cmd in xfburn cdrecord
