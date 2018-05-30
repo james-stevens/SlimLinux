@@ -72,6 +72,47 @@ The ISO image is "hybrid", which means it should boot from either
 a CD/DVD (real or virtual) or a USB stick.
 
 
+Next Move
+=========
+
+Once you have created the operating system and ISO image, you can
+do one of five different things next ...
+
+make dvd             ... burn ISO installer to a CD/DVD disk
+make usb             ... copy the ISO installer to a USB stick
+
+make livedvd         ... make a bootable liveCD and burn to disk
+make liveusb         ... make a live USB stick (O/S is fixed)
+                         (config is fixed at create time)
+                         (user data is stored in RAM)
+
+make bootusb         ... install SlimLinux on a USB stick to boot & run
+                         (config can be modified)
+                         (user data is stored on USB)
+
+
+"dvd" & "usb" both copy the installation ISO to a disk/usb stick so
+you can boot it in your target machine to install SlimLinux onto
+an internal hard disk of the target machine.
+
+"livedvd" and "liveusb" will create a "liveCD" version of the SlimLinux
+you have chosen. A "liveCD" boots & runs SlimLinux itself includeing
+any config data you have added. All "user data" is stored in a RAM-Disk
+which is lost if you reboot. This can be OK if you are running a Router,
+Firewall, NTPd server, DNS Resolver, Secondary DNS etc.
+
+"bootusb" will install SlimLinux to a USB stick, as if the stick was a hard
+disk.  You can then plug that stick into a target machine and it will boot &
+run just like it was running from a hard disk. There is no further installation
+required.  All config & user data will stored on the stick. Its more likely to 
+boot and run correctly, if the target machine has no hard disks attached.
+
+With the "liveusb" the operating system and config are fixed at create time.
+With the "bootusb" the O/S & config are partitions on the USB stick, so can
+be updated.
+
+
+
 If you change the "mkiso.cfg" file, or run "./configure" again, you
 then need to run :-
 
