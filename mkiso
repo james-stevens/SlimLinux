@@ -23,7 +23,7 @@ if ! test "${uid}" = "0"
 		if test "${upload_ip}" -a "${upload_dir}" -a -f "${iso}"
 			then
 				cd ${output}
-				tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
+				tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xf -"
 			fi
 
         exit 0
@@ -381,12 +381,14 @@ chown --reference=LICENSE ${iso}
 
 echo "isofile=\"${iso}\"" > ${output}/iso.cfg
 
-du -h ${iso}
+echo "-------------------------------------------------"
+du -h output/${isofile}
+echo "-------------------------------------------------"
 
 if test "${upload_ip}" -a "${upload_dir}" -a -z "${with_sudo}"
 	then
 		cd ${output}
-		tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xvf -"
+		tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xf -"
 	fi
 
 echo ""

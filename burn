@@ -3,24 +3,35 @@
 
 if ! test -f output/iso.cfg
 	then
-		echo "ERROR: Can't find the 'output/iso.cfg' file - try running 'make clean all'"
-		exit 0
+		make all
+		if ! test -f output/iso.cfg
+			then
+				echo "ERROR: Can't find the 'output/iso.cfg' file - try running 'make clean all'"
+				exit 0
+			fi
 	fi
 
 . output/iso.cfg
 
 if ! test -f "${isofile}"
 	then
-		echo "ERROR: Can't find the ISO image - try running 'make clean all'"
-		exit 0
+		make all
+		if ! test -f "${isofile}"
+			then
+				echo "ERROR: Can't find the ISO image - try running 'make clean all'"
+				exit 0
+			fi
 	fi
 
-opt="$1"
+opt="$1"; shift
+parent="${PWD}"
 
 
 
 function burn_dvd()
 {
+	echo ""; echo -n "Insert a writeable disk you want to burn and press [Enter] :"; read x
+
 	for cmd in xfburn cdrecord
 	do
 		if ${cmd} --help >/dev/null 2>&1
@@ -44,29 +55,75 @@ function burn_dvd()
 
 
 
+function umount_usb()
+{
+	while grep -q "^${dev}" /proc/mounts
+		do
+			devs="$(awk '/^\/dev\/'"${disk}"'[0-9]/ { printf "%s ",$1 }' /proc/mounts)"
+			for file in ${devs}
+				do
+					echo "Found '${file}' mounted - running unmounting"
+					${umount} ${file}
+				done
+			sleep 3
+		done
+	echo ""
+	echo ""
+	sleep 1
+}
+
+
+
 function choose_usb()
 {
+	echo "We *STRONGLY* recommend you switch off the option to automatically mount"
+	echo "removeable media before using this option."
+	echo ""
+	echo ""; echo -n "Plug-in the USB stick you want to use and press [Enter] :"; read x
 	echo ""
 	echo "Select a USB drive:-"
-	echo "(only USB drives *not* in use are listed)"
 	echo ""
-	usb=""; sep=""
-	for disk in $(ls -l /sys/block/ | awk '/\/usb/ { if (index($9,"sd")==1) print $9 }')
-	do 
-		if ! grep -qE "^/dev/${disk}[0-9] " /proc/mounts
-			then
-				usb="${usb}${sep}${disk}"; sep=" ";
-			fi
-	done
-	for d in ${usb}
+
+	disk="";
+	while ! test -f /sys/block/${disk}/size
 	do
-		name=$(cat /sys/block/${d}/device/model)
-		size=$(awk '{ printf "%.1fGb",int($0)*512/1000000000 }' /sys/block/${d}/size)
-		echo "${d} - ${name} ${size}"
+		usb=""; sep=""
+		for disk in $(ls -l /sys/block/ | awk '/\/usb/ { if (index($9,"sd")==1) print $9 }')
+		do 
+			usb="${usb}${sep}${disk}"; sep=" ";
+		done
+		for d in ${usb}
+		do
+			name=$(cat /sys/block/${d}/device/model)
+			size=$(awk '{ printf "%.1fGb",int($0)*512/1000000000 }' /sys/block/${d}/size)
+			echo "-> ${d} - ${name} ${size}"
+		done
+
+		echo ""
+		echo -n "Enter drive name, choose from '${usb}': "
+		read disk
 	done
-	echo ""
-	echo -n "Enter drive name (${usb}): "
-	read disk
+	dev="/dev/${disk}"
+
+	if grep -q "^${dev}" /proc/mounts
+		then
+			echo ""
+			echo -n "!!! USB stick is in use, unmount it ? (y/n): "; read yn
+			if test "${yn}" = "y"
+				then
+					umount_usb
+					if grep -q "^${dev}" /proc/mounts
+						then
+						echo ""
+						echo "ERROR: ${disk} failed to unmount"
+						exit 0
+						fi
+				else
+					echo ""
+					echo "ERROR: can't use a USB stick that is mounted"
+					exit 0
+				fi
+		fi
 }
 
 
@@ -75,20 +132,16 @@ function choose_usb()
 function burn_usb()
 {
 	choose_usb
-	if ! test -f /sys/block/${disk}/size
-		then
-			echo "ERROR: No USB disk chosen"
-			exit 0
-		fi
+
 	uid=$(id -u)
 	if ! test "${uid}" = "0"
 	    then
 			echo "========= need 'root' access to burn USB stick ========="
 			with_sudo="sudo"
 		fi
-	${with_sudo} dd if=${isofile} of=/dev/${disk} bs=1K
-	${with_sudo} hdparm -f /dev/${disk}
-	${with_sudo} hdparm -z /dev/${disk}
+	${with_sudo} dd if=${isofile} of=${dev} bs=1K
+	${with_sudo} hdparm -f ${dev}
+	${with_sudo} hdparm -z ${dev}
 
 	echo ""
 	echo "=========================="
@@ -96,6 +149,193 @@ function burn_usb()
 	echo "=========================="
 	echo ""
 }
+
+
+
+function burn_bootusb()
+{
+	root="${parent}/iso/rootfs.txz"
+	if ! test -f "${root}"
+		then
+			echo "ERROR: Can't find the '${root}' file - try running 'make clean all'"
+			exit 0
+		fi
+
+	uid=$(id -u)
+	if ! test "${uid}" = "0"
+		then
+			echo "***********************************************************"
+			echo ""
+			echo "Becuase you are not UID=0 (root), I will need to use 'sudo'"
+			echo ""
+			echo "***********************************************************"
+			sudo ./burn ${opt} $*
+			exit 0
+		fi
+
+	if udisksctl help >/dev/null 2>&1
+		then
+			umount="udisksctl unmount -b"
+			have_udisksctl="Y"
+		else
+			umount="umount"
+		fi
+
+	cd output
+	rm -rf mnt
+	if test -d mnt
+		then
+			echo "ERROR: could not clear old 'output/mnt' directory"
+			exit 0
+		fi
+	cd ${parent}
+
+	choose_usb
+
+	for x in 2 4 1; do ${umount} ${dev}${x}; done >/dev/null 2>&1
+
+	echo "---> Formatting USB stick (${disk})"
+
+	sz=$(cat /sys/block/${disk}/size)
+	sz=$[${sz}/200000]
+
+	if test "${sz}" -gt 180
+		then
+			{
+			echo "label: gpt"
+			echo ",512000,L,*"
+			echo ",21000,L"
+			echo ",16700000,S"
+			echo ",,L"
+			} | sfdisk -q ${dev} >/dev/null 2>&1
+	elif test "${sz}" -gt 80
+		then
+			{
+			echo "label: gpt"
+			echo ",200000,L,*"
+			echo ",11000,L"
+			echo ",6500000,S"
+			echo ",,L"
+			} | sfdisk -q ${dev} >/dev/null 2>&1
+		else
+			{
+			echo "label: gpt"
+			echo ",140000,L,*"
+			echo ",11000,L"
+			echo ",3500000,S"
+			echo ",,L"
+			} | sfdisk -q ${dev} >/dev/null 2>&1
+		fi
+
+	p4_type="reiserfs"
+	p4_cmd="mkfs.${p4_type}"
+
+	{
+	mkfs.ext2 -m 0 -q ${dev}1
+	mkswap ${dev}3
+	mkfs.ext2 -m 0 -q ${dev}2
+	echo y | ${p4_cmd} ${dev}4
+	} > /dev/null 2>&1
+
+	echo "---> Installing Operating System"
+
+	mkdir output/mnt
+	mount ${dev}1 output/mnt
+
+	cd output/mnt
+	tar xf ${root}
+
+	cd ${parent}
+	chroot output/mnt ldconfig
+
+	cd output/mnt
+	mkdir ram/tmp
+	cp -a ${dev} ${dev}[1234] dev
+	mknod dev/sda1 b 8 1
+
+	# {
+	# echo "append=\" rootfstype=ext2 rootwait\""
+	# grep -v "^append" etc/lilo.conf
+	# } > etc/lilo.new
+	# mv etc/lilo.new etc/lilo.conf
+
+	{
+	echo "boot = ${dev}"
+	echo "disk = ${dev} bios=0x80"
+	grep -v "^boot" etc/lilo.conf
+	} > etc/stick.lilo
+
+	chroot ${parent}/output/mnt lilo -c -C etc/stick.lilo >/dev/null 2>&1
+
+	rm -f dev/* ram/tmp/*
+	rmdir ram/tmp
+
+	cd ${parent}
+	mkdir -p output/mnt/opt/config
+	mkdir -p output/mnt/opt/data
+
+	mount -ro remount ${dev}1
+
+	echo "---> Installing Data & Config"
+
+	file="${parent}/iso/config.tgz"
+	if test -f ${file}
+		then
+			mount ${dev}2 output/mnt/opt/config
+			cd output/mnt/opt/config
+			tar xf ${file}
+			sync
+			cd ${parent}
+			mount -ro remount ${dev}2
+		fi
+
+	file="${parent}/iso/data.txz"
+	if test -f ${file}
+		then
+			mount ${dev}4 output/mnt/opt/data
+			cd output/mnt/opt/data
+			tar xf ${file}
+			sync
+			cd ${parent}
+			mount -ro remount ${dev}4
+		fi
+
+	sync
+	hdparm -f ${dev} > /dev/null 2>&1
+
+	echo "---> Flushing data to stick"
+	sync
+
+
+	cd ${parent}
+	for x in 2 4 1; do ${umount} ${dev}${x}; done >/dev/null 2>&1
+	rmdir output/mnt
+
+	hdparm -f ${dev} > /dev/null 2>&1
+
+	echo ""
+	echo "==================================================================="
+	echo ""
+	echo "If your system automatically mounts the partitions on the USB Stick"
+	echo "you *must* unmount them before unpligging it"
+	echo ""
+	echo "==================================================================="
+
+	echo -n "Checking ...."
+	sleep 5
+	echo ""
+	umount_usb
+
+	if test "${have_udisksctl}" = "Y"
+		then
+			echo "Powering off '${disk}'"
+			udisksctl power-off -b ${dev}
+		fi
+
+	exit 0
+}
+
+
 
 
 if test -z "${opt}"
@@ -107,5 +347,6 @@ if test -z "${opt}"
 case ${opt} in
 	dvd) burn_dvd ;;
 	usb) burn_usb;;
+	bootusb) burn_bootusb;;
 	*) echo "ERROR: unsupported option '${opt}'" ;;
 esac
