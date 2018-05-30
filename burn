@@ -378,7 +378,7 @@ function burn_bootusb()
 
 if test -z "${opt}"
 	then
-		echo "ERROR: you must supply a command line option from - dvd"
+		echo "ERROR: you must supply a command line option from - dvd usb bootusb livecd liveusb"
 		exit 0
 	fi
 

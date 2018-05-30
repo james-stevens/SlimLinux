@@ -34,3 +34,9 @@ usb:
 
 bootusb:
 	./burn bootusb
+
+livecd:
+	./burn livecd
+
+liveusb:
+	./burn liveusb
