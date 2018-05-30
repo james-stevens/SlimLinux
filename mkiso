@@ -345,7 +345,7 @@ if ! test -d ${isobase}/random
 		mkdir ${isobase}/random
 		for x in 0 1 2 3 4 5 6 7 8 9
 		do
-			dd if=/dev/urandom of=${isobase}/random/${x}.rnd bs=1 count=512 >/dev/null 2>&1
+			dd if=/dev/urandom of=${isobase}/random/${x}.rnd bs=512 count=1 >/dev/null 2>&1
 		done
 	fi
 

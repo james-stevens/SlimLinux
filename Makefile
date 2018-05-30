@@ -25,3 +25,12 @@ config:
 	sh -c "make clean all"
 
 mkiso.cfg: ./configure
+
+dvd:
+	./burn dvd
+
+usb:
+	./burn usb
+
+bootusb:
+	./burn bootusb

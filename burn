@@ -27,6 +27,14 @@ opt="$1"; shift
 parent="${PWD}"
 
 
+if udisksctl help >/dev/null 2>&1
+	then
+		umount="udisksctl unmount -b"
+		have_udisksctl="Y"
+	else
+		umount="umount"
+	fi
+
 
 function burn_dvd()
 {
@@ -136,12 +144,18 @@ function burn_usb()
 	uid=$(id -u)
 	if ! test "${uid}" = "0"
 	    then
-			echo "========= need 'root' access to burn USB stick ========="
+			echo "========= need 'root' access to burn USB stick - calling 'sudo' ========="
 			with_sudo="sudo"
 		fi
 	${with_sudo} dd if=${isofile} of=${dev} bs=1K
 	${with_sudo} hdparm -f ${dev}
 	${with_sudo} hdparm -z ${dev}
+
+	if test "${have_udisksctl}" = "Y"
+		then
+			echo "Powering off '${disk}'"
+			udisksctl power-off -b ${dev}
+		fi
 
 	echo ""
 	echo "=========================="
@@ -171,14 +185,6 @@ function burn_bootusb()
 			echo "***********************************************************"
 			sudo ./burn ${opt} $*
 			exit 0
-		fi
-
-	if udisksctl help >/dev/null 2>&1
-		then
-			umount="udisksctl unmount -b"
-			have_udisksctl="Y"
-		else
-			umount="umount"
 		fi
 
 	cd output
@@ -253,11 +259,11 @@ function burn_bootusb()
 	cp -a ${dev} ${dev}[1234] dev
 	mknod dev/sda1 b 8 1
 
-	# {
-	# echo "append=\" rootfstype=ext2 rootwait\""
-	# grep -v "^append" etc/lilo.conf
-	# } > etc/lilo.new
-	# mv etc/lilo.new etc/lilo.conf
+	{
+	echo "append=\" rootfstype=ext2 rootdelay=5\""
+	grep -v "^append" etc/lilo.conf
+	} > etc/lilo.new
+	mv etc/lilo.new etc/lilo.conf
 
 	{
 	echo "boot = ${dev}"
@@ -267,7 +273,7 @@ function burn_bootusb()
 
 	chroot ${parent}/output/mnt lilo -c -C etc/stick.lilo >/dev/null 2>&1
 
-	rm -f dev/* ram/tmp/*
+	rm -f dev/* ram/tmp/* etc/stick.lilo
 	rmdir ram/tmp
 
 	cd ${parent}
@@ -278,16 +284,28 @@ function burn_bootusb()
 
 	echo "---> Installing Data & Config"
 
+	mount ${dev}2 output/mnt/opt/config
+	cd output/mnt/opt/config
+	rm -rf lost+found
+	mkdir lost+found
+	dd if=/dev/urandom of=seed.rnd bs=512 count=1 >/dev/null 2>&1
+	cp ${parent}/iso/install.cfg .
+
 	file="${parent}/iso/config.tgz"
 	if test -f ${file}
 		then
-			mount ${dev}2 output/mnt/opt/config
-			cd output/mnt/opt/config
 			tar xf ${file}
-			sync
-			cd ${parent}
-			mount -ro remount ${dev}2
 		fi
+	if ! test -f system.cfg
+		then
+			cat ${parent}/output/mnt/etc/base_config/* > system.cfg
+		fi
+	chown -R 0:0 .
+	chmod 600 system.cfg
+
+	sync
+	cd ${parent}
+	mount -ro remount ${dev}2
 
 	file="${parent}/iso/data.txz"
 	if test -f ${file}
