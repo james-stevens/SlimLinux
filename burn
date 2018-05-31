@@ -17,7 +17,6 @@ output="${parent}/output"
 iso="${output}/${isofile}"
 liveiso="${output}/live_${isofile}"
 
-echo "iso=${iso}"
 if ! test -f "${iso}"
 	then
 		make all

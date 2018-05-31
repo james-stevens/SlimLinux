@@ -525,7 +525,7 @@ if test "${remade_rootfs}" = "Y"
 		rm ${file}.gz
 
 		{
-		echo "LSlim-Linux ISO LiveCD"
+		echo "Slim-Linux ISO LiveCD"
 		echo ""
 		} > ${isobase}/isolinux/message.txt
 
