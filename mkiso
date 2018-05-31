@@ -75,6 +75,7 @@ if test "${cmd}" = "clean" -o "${cmd}" = "config"
 		cd ${parent}
 		umount ${output}/install_os.dd_mnt >/dev/null 2>&1
 		rm -f ${isobase}/isolinux/kernel
+		rm -f ${isobase}/sfdisk.cfg
 		rm -fr ${output}/*
 		rm -rf ROOT CONFIG DATA
 		rm -f ${rootfs} ${initrd} ${isobase}/install.cfg
@@ -240,6 +241,7 @@ function add_overlays()
 {
 	echo "Total overlays=${overlays}"
 
+	rm -f ${isobase}/sfdisk.cfg
 	for ovr in ${overlays}
 		do
 		file="${parent}/overlays/${ovr}/sfdisk.cfg"
@@ -425,6 +427,8 @@ if test "${remade_rootfs}" = "Y"
 		isobase="${output}/live_iso"
 		initrd=${isobase}/isolinux/initrd.img
 
+		rm -f ${isobase}/config.tgz ${isobase}/rootfs.txz
+
 		rootdir="${parent}/ROOT"
 		isofile="live_${binary}.iso"
 		iso="${output}/${isofile}"
@@ -467,11 +471,10 @@ if test "${remade_rootfs}" = "Y"
 		rm -f ${mnt}/boot/kernel
 		mkdir -p ${mnt}/etc/config
 
-		fl="${isobase}/config.tgz"
-		if test -f "${fl}"
+		if test -f "${configfs}"
 			then
 				cd ${mnt}/etc/config
-				tar xf ${fl}
+				tar xf ${configfs}
 			fi
 
 		if test -f ${mnt}/etc/config/system.cfg
@@ -529,6 +532,13 @@ if test "${remade_rootfs}" = "Y"
 		echo ""
 		} > ${isobase}/isolinux/message.txt
 
+		{
+		echo "SlimLinux LiveCD"
+		echo ""
+		echo "Please boot this CD / USB-Stick in your target machine"
+		} > ${isobase}/readme.txt
+
+
 		do_sz=$[${sz}+(${sz}/5)]
 		{
 		echo "default kernel initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 ramdisk_size=${do_sz} ro root=/dev/ram0"
@@ -536,6 +546,10 @@ if test "${remade_rootfs}" = "Y"
 		echo "timeout 0"
 		echo "display message.txt"
 		} > ${isobase}/isolinux/isolinux.cfg
+
+		cd ${isobase}
+		md5sum $(find -type f -not -name chk.md5) > chk.md5
+		cd ${parent}
 
 		mkisofs -quiet -o ${iso} \
 			-b isolinux/isolinux.bin \
