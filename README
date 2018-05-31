@@ -96,7 +96,7 @@ you can boot it in your target machine to install SlimLinux onto
 an internal hard disk of the target machine.
 
 "livedvd" and "liveusb" will create a "liveCD" version of the SlimLinux
-you have chosen. A "liveCD" boots & runs SlimLinux itself includeing
+you have chosen. A "liveCD" boots & runs SlimLinux itself including
 any config data you have added. All "user data" is stored in a RAM-Disk
 which is lost if you reboot. This can be OK if you are running a Router,
 Firewall, NTPd server, DNS Resolver, Secondary DNS etc.
@@ -128,8 +128,8 @@ operating system you are using.
 
 
 
-Make Options
-===========
+Other Make Options
+==================
 
 clean  - remove all files, other than those brought in by "git"
 all    - make all files needed by the ISO and the ISO itself
