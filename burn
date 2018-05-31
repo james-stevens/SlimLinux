@@ -288,6 +288,8 @@ function burn_bootusb()
 	echo y | ${p4_cmd} ${dev}4
 	} > /dev/null 2>&1
 
+	rootid=$(tune2fs -l ${dev}1 | awk '/^Filesystem UUID:/ { print $NF }')
+
 	echo "---> Installing Operating System"
 
 	mkdir output/mnt
@@ -313,7 +315,9 @@ function burn_bootusb()
 	{
 	echo "boot = ${dev}"
 	echo "disk = ${dev} bios=0x80"
-	grep -v "^boot" etc/lilo.conf
+	awk '!/^boot/ {
+		if ($1=="root") print "\troot=\"LABEL=%s\"\n","'"${rootid}"'"
+		else print }' etc/lilo.conf
 	} > etc/stick.lilo
 
 	chroot ${parent}/output/mnt lilo -c -C etc/stick.lilo >/dev/null 2>&1
