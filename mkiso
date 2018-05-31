@@ -20,10 +20,11 @@ if ! test "${uid}" = "0"
 		. ${cfg}
 		isofile="${binary}.iso"
 		iso="${output}/${isofile}"
+		liveiso="${output}/${isofile}"
 		if test "${upload_ip}" -a "${upload_dir}" -a -f "${iso}"
 			then
 				cd ${output}
-				tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xf -"
+				tar cf - ${liveiso} ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xf -"
 			fi
 
         exit 0
@@ -523,6 +524,10 @@ if test "${remade_rootfs}" = "Y"
 		cp ${file}.gz ${initrd}
 		rm ${file}.gz
 
+		{
+		echo "LSlim-Linux ISO LiveCD"
+		echo ""
+		} > ${isobase}/isolinux/message.txt
 
 		do_sz=$[${sz}+(${sz}/5)]
 		{

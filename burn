@@ -189,14 +189,14 @@ function burn_usb()
 			echo "========= need 'root' access to burn USB stick - calling 'sudo' ========="
 			with_sudo="sudo"
 		fi
-	${with_sudo} dd if=${iso} of=${dev} bs=1K
+	${with_sudo} dd if=${image} of=${dev} bs=1K
 	${with_sudo} hdparm -f ${dev}
 	${with_sudo} hdparm -z ${dev}
 
 	if test "${have_udisksctl}" = "Y"
 		then
 			echo "Powering off '${disk}'"
-			udisksctl power-off -b ${dev}
+			${with_sudo} udisksctl power-off -b ${dev}
 		fi
 
 	echo ""
@@ -315,9 +315,7 @@ function burn_bootusb()
 	{
 	echo "boot = ${dev}"
 	echo "disk = ${dev} bios=0x80"
-	awk '!/^boot/ {
-		if ($1=="root") print "\troot=\"LABEL=%s\"\n","'"${rootid}"'"
-		else print }' etc/lilo.conf
+	grep -v '^boot' etc/lilo.conf
 	} > etc/stick.lilo
 
 	chroot ${parent}/output/mnt lilo -c -C etc/stick.lilo >/dev/null 2>&1
