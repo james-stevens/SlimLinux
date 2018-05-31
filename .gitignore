@@ -1,3 +1,4 @@
+iso/isolinux/isolinux.cfg
 output
 overlays/svr1
 iso/version.txt

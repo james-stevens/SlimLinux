@@ -2,7 +2,7 @@
 
 parent="$PWD"
 
-base="${parent}/baseos"
+baseos="${parent}/baseos"
 cfg=${parent}/mkiso.cfg
 output="${parent}/output"
 mkdir -p ${output}
@@ -37,6 +37,7 @@ if test "$1" = "-u"
 
 isobase=${parent}/iso
 
+rootdir="${parent}/ROOT"
 rootfs=${isobase}/rootfs.txz 
 configfs=${isobase}/config.tgz 
 datafs=${isobase}/data.txz 
@@ -62,6 +63,7 @@ if test "${cmd}" = "--help" -o "${cmd}" = "-h"
 		exit 0
 	fi
 
+if test "${cmd}" = "live"; then remade_rootfs="Y"; fi
 
 if test "${cmd}" = "initrd"; then rm -f ${initrd}; fi
 
@@ -70,10 +72,11 @@ if test "${cmd}" = "rootfs"; then rm -f ${rootfs}; fi
 if test "${cmd}" = "clean" -o "${cmd}" = "config"
 	then
 		cd ${parent}
-		umount install_os.dd_mnt >/dev/null 2>&1
-		rm -f install_os.dd output/*
-		rm -rf ROOT CONFIG DATA install_os.dd_mnt
-		rm -f ${rootfs} ${initrd} iso/isolinux/kernel ${isobase}/install.cfg
+		umount ${output}/install_os.dd_mnt >/dev/null 2>&1
+		rm -f ${isobase}/isolinux/kernel
+		rm -fr ${output}/*
+		rm -rf ROOT CONFIG DATA
+		rm -f ${rootfs} ${initrd} ${isobase}/install.cfg
 		rm -f ${md5chk}
 		rm -rf ${isobase}/random
 		if test "${cmd}" = "config"
@@ -115,21 +118,21 @@ if ! test -f ${initrd}
 	then
 		echo "Building 'initrd' for install O/S"
 
-		umount install_os.dd_mnt >/dev/null 2>&1
-		rm -f install_os.dd install_os.dd_mnt
+		umount ${output}/install_os.dd_mnt >/dev/null 2>&1
+		rm -fr ${output}/install_os.dd ${output}/install_os.dd_mnt
 
-		dd if=/dev/zero of=install_os.dd bs=1K count=8000 >/dev/null 2>&1
-		mke2fs -q -N 400 -m 0 -F install_os.dd
-		mkdir install_os.dd_mnt
-		mount -o loop install_os.dd install_os.dd_mnt
+		dd if=/dev/zero of=${output}/install_os.dd bs=1K count=8000 >/dev/null 2>&1
+		mke2fs -q -N 400 -m 0 -F ${output}/install_os.dd
+		mkdir ${output}/install_os.dd_mnt
+		mount -o loop ${output}/install_os.dd ${output}/install_os.dd_mnt
 
-		cd ${base}/rootfs
-		tar -cf - -T ${parent}/build_files/common.lst | (cd ${parent}/install_os.dd_mnt ; tar --strip 1 -xf -)
+		cd ${baseos}/rootfs
+		tar -cf - -T ${parent}/build_files/common.lst | (cd ${output}/install_os.dd_mnt ; tar --strip 1 -xf -)
 
 		cd ${parent}/install_os
-		cp -a . ${parent}/install_os.dd_mnt
+		cp -a . ${output}/install_os.dd_mnt
 
-		cd ${parent}/install_os.dd_mnt
+		cd ${output}/install_os.dd_mnt
 		mkdir dev tmp mnt proc cdrom sys
 
 		chown -R 0:0 .
@@ -140,27 +143,31 @@ if ! test -f ${initrd}
 		do
 			find ${dir} -type f -exec chmod 555 {} ';'
 		done
-		chroot ${parent}/install_os.dd_mnt ldconfig
+		chroot ${output}/install_os.dd_mnt ldconfig
 		rm -f sbin/ldconfig
 
 		cd ${parent}
 
-		sync
-		umount install_os.dd_mnt
-		sync
-		rmdir install_os.dd_mnt
-		gzip -9 install_os.dd
+		num=$(find ${output}/install_os.dd_mnt | wc -l)
+		sz=$(du -s ${output}/install_os.dd_mnt | cut -f 1)
+		sz=$[${sz}+(4*${num})]
 
-		cp -a install_os.dd.gz ${initrd}
+		sync
+		umount ${output}/install_os.dd_mnt
+		sync
+		rmdir ${output}/install_os.dd_mnt
+		gzip -9 ${output}/install_os.dd
 
-		rm -f install_os.dd.gz
+		cp -a ${output}/install_os.dd.gz ${initrd}
+
+		rm -f ${output}/install_os.dd.gz
 	fi
 
 
 
 function fix_os_perms()
 {
-	cd ${parent}/ROOT
+	cd ${rootdir}
 	chown -R 0:0 .
 	find . -type f -exec chmod 644 {} ';'
 	find . -type d -exec chmod 755 {} ';'
@@ -264,7 +271,7 @@ function add_overlays()
 			if test -d "${d}"
 				then
 					echo "- Adding overlay code: ${ovr}/${dir}"
-					cd ${d}; cp -a . ${parent}/ROOT
+					cd ${d}; cp -a . ${rootdir}
 				fi
 			done
 		done
@@ -292,25 +299,25 @@ if ! test -f ${rootfs}
 	then
 		echo "Building ROOT filesystem"
 
-		rm -rf ${parent}/ROOT ${parent}/CONFIG ${parent}/DATA
+		rm -rf ${rootdir} ${parent}/CONFIG ${parent}/DATA
 		rm -f ${rootfs} ${configfs} ${datafs}
 
-		mkdir ${parent}/ROOT
-		cd ${base}/rootfs
+		mkdir ${rootdir}
+		cd ${baseos}/rootfs
 
 		for dir in common ${binary}
 			do
 				echo "- Adding base O/S code: ${dir}"
-				cd ${base}/rootfs/${dir}
-				cp -a . ${parent}/ROOT
+				cd ${baseos}/rootfs/${dir}
+				cp -a . ${rootdir}
 			done
 
 		if test "${overlays}"; then add_overlays; fi
 
-		cp ${kernel} ${parent}/ROOT/boot/kernel
+		cp ${kernel} ${rootdir}/boot/kernel
 
 		cd ${parent}
-		du -sh ROOT
+		du -sh ${rootdir}
 
 		fix_os_perms
 		for ovr in ${overlays}
@@ -319,7 +326,7 @@ if ! test -f ${rootfs}
 			if test -f overlays/${ovr}/fix_perms; then . overlays/${ovr}/fix_perms; fi
 		done
 
-		cd ${parent}/ROOT
+		cd ${rootdir}
 		echo "- compressing ROOT file system"
 		tar Jcf ${rootfs} .
 		du -sh ${rootfs}
@@ -335,6 +342,8 @@ if ! test -f ${rootfs}
 				cd ${parent}/DATA
 				tar Jcf ${datafs} .
 			fi
+
+		remade_rootfs="Y"
 	fi
 
 
@@ -347,6 +356,18 @@ if ! test -d ${isobase}/random
 		do
 			dd if=/dev/urandom of=${isobase}/random/${x}.rnd bs=512 count=1 >/dev/null 2>&1
 		done
+	fi
+
+
+if test "${sz}"
+	then
+		do_sz=$[${sz}+${sz}]
+		{
+		echo "default kernel initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 ramdisk_size=${do_sz} ro root=/dev/ram0"
+		echo "prompt 0"
+		echo "timeout 0"
+		echo "display message.txt"
+		} > ${isobase}/isolinux/isolinux.cfg
 	fi
 
 
@@ -372,39 +393,186 @@ mkisofs -quiet -o ${iso} \
 	-boot-info-table \
 	-V "SlimLinux" .
 
-rm -f ${isobase}/isolinux/kernel
-
 cd ${parent}
 isohybrid ${iso}
 
 chown --reference=LICENSE ${iso}
 
-echo "isofile=\"${iso}\"" > ${output}/iso.cfg
+{
+cat ${isobase}/install.cfg
+echo "isofile=\"${isofile}\"" 
+} > ${output}/iso.cfg
 
 echo "-------------------------------------------------"
-du -h output/${isofile}
+du -h ${output}/${isofile}
 echo "-------------------------------------------------"
 
-if test "${upload_ip}" -a "${upload_dir}" -a -z "${with_sudo}"
+if test "${upload_ip}" -a "${upload_dir}" -a -z "${with_sudo}" -a -f ${iso}
 	then
 		cd ${output}
 		tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xf -"
 	fi
 
-echo ""
-echo "============================ Options ==================================="
-echo ""
-echo "make dvd             ... burn ISO image to a CD/DVD disk"
-echo "make usb             ... copy the ISO installer to a USB stick"
-echo ""
-echo "make livedvd         ... make a bootable liveCD and burn to disk"
-echo "make liveusb         ... make a live USB stick (O/S is fixed)"
-echo "                         (config is fixed at create time)"
-echo "                         (user data is stored in RAM)"
-echo ""
-echo "make bootusb         ... install SlimLinux on a USB stick to boot & run"
-echo "                         (config can be modified)"
-echo "                         (user data is stored on USB)"
-echo ""
-echo "============================ Options ==================================="
-echo ""
+
+
+
+if test "${remade_rootfs}" = "Y"
+	then
+		cd ${parent}
+
+		cp -a ${parent}/iso ${output}/live_iso
+		isobase="${output}/live_iso"
+		initrd=${isobase}/isolinux/initrd.img
+
+		rootdir="${parent}/ROOT"
+		isofile="live_${binary}.iso"
+		iso="${output}/${isofile}"
+
+		if ! test -d "${rootdir}"
+			then
+				make all
+				if ! test -d "${rootdir}"
+					then
+						echo "ERROR: can't find or make a ROOT base directory"
+						exit 0
+					fi
+			fi
+
+		echo "---> Building the Live-O/S"
+
+		sz=$(du -s ${rootdir} | cut -f 1)
+		num=$(find ${rootdir} | wc -l)
+		blk=1024
+
+		do_sz=$[${sz}+(${num}*4)+(${sz}/10)]
+		do_num=$[${num}+(${num}/8)]
+
+		file="${output}/live.dd"
+		mnt="${output}/live.mnt"
+
+		umount ${mnt} 2>/dev/null
+		rm -rf ${file} ${mnt} ${file}.gz
+
+		dd if=/dev/zero bs=${blk} count=${do_sz} of=${file} >/dev/null 2>&1
+		mke2fs -q -N ${do_num} -m 0 -F ${file}
+		mkdir ${mnt}
+		mount -o loop ${file} ${mnt}
+		cd ${mnt}
+		rmdir lost+found; mkdir lost+found
+
+		cd ${rootdir}
+		cp -a . ${mnt}
+
+		rm -f ${mnt}/boot/kernel
+		mkdir -p ${mnt}/etc/config
+
+		fl="${isobase}/config.tgz"
+		if test -f "${fl}"
+			then
+				cd ${mnt}/etc/config
+				tar xf ${fl}
+			fi
+
+		if test -f ${mnt}/etc/config/system.cfg
+			then
+				chown 0:0 ${mnt}/etc/config/system.cfg
+				chmod 600 ${mnt}/etc/config/system.cfg
+			fi
+
+		dd if=/dev/urandom of=${mnt}/etc/config/seed.rnd bs=512 count=1 >/dev/null 2>&1
+
+		cd ${parent}
+		cp ${isobase}/install.cfg ${mnt}/etc/config
+
+		cp -a /dev/null /dev/random /dev/urandom ${mnt}/dev
+		mkdir ${mnt}/ram/etc ${mnt}/ram/ssh
+		chmod 700 ${mnt}/ram/ssh
+		echo "root:x:0:0::/root:/bin/false" > ${mnt}/ram/etc/passwd
+		chroot ${mnt} ssh-keygen -A >/dev/null 2>&1
+
+		cd ${mnt}/ram
+		mv ssh ${mnt}/etc/config
+
+		cd ${parent}
+		rm -rf ${mnt}/ram/etc ${mnt}/dev/*
+
+		cfgsz=$(du -s ${mnt}/etc/config | cut -f 1)
+		cfgnum=$(find ${mnt}/etc/config | wc -l)
+
+		cfgsz=$[${cfgsz}+(${cfgsz}/10)+(${cfgnum}*4)]
+
+
+		if cmp -s ${mnt}/etc/fstab baseos/rootfs/common/etc/fstab 
+			then
+				{
+				echo "CONFIG /opt/config tmpfs noexec,noatime,size=${cfgsz}K 0 0"
+				echo "DATA /opt/data tmpfs noexec,noatime 0 0"
+				} > ${mnt}/etc/fstab
+			fi
+
+		sync
+		umount ${mnt}
+		rmdir ${mnt}
+
+		echo "---> Building the Live-ISO"
+
+		sync
+		gzip -9 ${file}
+
+		cd ${parent}
+		cp ${file}.gz ${initrd}
+		rm ${file}.gz
+
+
+		do_sz=$[${sz}+(${sz}/5)]
+		{
+		echo "default kernel initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 ramdisk_size=${do_sz} ro root=/dev/ram0"
+		echo "prompt 0"
+		echo "timeout 0"
+		echo "display message.txt"
+		} > ${isobase}/isolinux/isolinux.cfg
+
+		mkisofs -quiet -o ${iso} \
+			-b isolinux/isolinux.bin \
+			-c isolinux/boot.cat \
+			-no-emul-boot -boot-load-size 4 \
+			-boot-info-table \
+			-V "Live-SlimLinux" ${isobase}
+
+		isohybrid ${iso}
+
+		rm -rf ${isobase}
+
+		du -h ${iso}
+
+		if test "${upload_ip}" -a "${upload_dir}" -a -z "${with_sudo}" -a -f ${iso}
+			then
+				cd ${output}
+				tar cf - ${isofile} | ssh ${upload_ip} "cd ${upload_dir} ; tar xf -"
+			fi
+	fi
+
+
+
+
+
+if test -f "${iso}"
+	then
+		echo ""
+		echo "============================ Options ==================================="
+		echo ""
+		echo "make dvd             ... burn ISO image to a CD/DVD disk"
+		echo "make usb             ... copy the ISO installer to a USB stick"
+		echo ""
+		echo "make livedvd         ... make a bootable liveCD and burn to disk"
+		echo "make liveusb         ... make a live USB stick (O/S is fixed)"
+		echo "                         (config is fixed at create time)"
+		echo "                         (user data is stored in RAM)"
+		echo ""
+		echo "make bootusb         ... install SlimLinux on a USB stick to boot & run"
+		echo "                         (config can be modified)"
+		echo "                         (user data is stored on USB)"
+		echo ""
+		echo "============================ Options ==================================="
+		echo ""
+	fi

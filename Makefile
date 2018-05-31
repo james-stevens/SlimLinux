@@ -26,6 +26,9 @@ config:
 
 mkiso.cfg: ./configure
 
+live:
+	./mkiso live
+
 dvd:
 	./burn dvd
 

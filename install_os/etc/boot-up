@@ -1,7 +1,5 @@
 #! /bin/sh
 
-set -x
-
 mount -rno remount /
 
 echo "Running boot-script"

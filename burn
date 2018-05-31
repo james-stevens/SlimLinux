@@ -12,11 +12,19 @@ if ! test -f output/iso.cfg
 	fi
 
 . output/iso.cfg
+parent="${PWD}"
+output="${parent}/output"
+iso="${output}/${isofile}"
+liveiso="${output}/live_${isofile}"
 
-if ! test -f "${isofile}"
+echo "iso=${iso}"
+if ! test -f "${iso}"
 	then
 		make all
-		if ! test -f "${isofile}"
+		. output/iso.cfg
+		iso="${output}/${isofile}"
+
+		if ! test -f "${iso}"
 			then
 				echo "ERROR: Can't find the ISO image - try running 'make clean all'"
 				exit 0
@@ -24,7 +32,6 @@ if ! test -f "${isofile}"
 	fi
 
 opt="$1"; shift
-parent="${PWD}"
 
 
 if udisksctl help >/dev/null 2>&1
@@ -36,8 +43,16 @@ if udisksctl help >/dev/null 2>&1
 	fi
 
 
+
 function burn_dvd()
 {
+	image="$1"
+	if ! test -f "${image}"
+		then
+			echo "ERROR: could not find ISO - ${image}"
+			exit 0
+		fi
+
 	if test -f /proc/sys/dev/cdrom/info
 		then
 			cdrom="/dev/$(awk '/drive name:/ { print $NF }' /proc/sys/dev/cdrom/info)"
@@ -64,8 +79,8 @@ function burn_dvd()
 	do
 		if ${cmd} --help >/dev/null 2>&1
 			then
-				if test "${cmd}" = "xfburn"; then burn_run="${cmd} -i ${isofile}"; fi
-				if test "${cmd}" = "cdrecord"; then burn_run="${cmd} -tao ${isofile}"; fi
+				if test "${cmd}" = "xfburn"; then burn_run="${cmd} -i ${image}"; fi
+				if test "${cmd}" = "cdrecord"; then burn_run="${cmd} -tao ${image}"; fi
 				break;
 			fi
 	done
@@ -159,6 +174,13 @@ function choose_usb()
 
 function burn_usb()
 {
+	image="$1"
+	if ! test -f "${image}"
+		then
+			echo "ERROR: could not find ISO - ${image}"
+			exit 0
+		fi
+
 	choose_usb
 
 	uid=$(id -u)
@@ -167,7 +189,7 @@ function burn_usb()
 			echo "========= need 'root' access to burn USB stick - calling 'sudo' ========="
 			with_sudo="sudo"
 		fi
-	${with_sudo} dd if=${isofile} of=${dev} bs=1K
+	${with_sudo} dd if=${iso} of=${dev} bs=1K
 	${with_sudo} hdparm -f ${dev}
 	${with_sudo} hdparm -z ${dev}
 
@@ -225,7 +247,10 @@ function burn_bootusb()
 	sz=$(cat /sys/block/${disk}/size)
 	sz=$[${sz}/200000]
 
-	if test "${sz}" -gt 180
+	if test -f ${parent}/iso/sfdisk.cfg
+		then
+			cat ${parent}/iso/sfdisk.cfg | sfdisk -q ${dev} >/dev/null 2>&1
+	elif test "${sz}" -gt 180
 		then
 			{
 			echo "label: gpt"
@@ -383,8 +408,10 @@ if test -z "${opt}"
 	fi
 
 case ${opt} in
-	dvd) burn_dvd ;;
-	usb) burn_usb;;
+	dvd) burn_dvd "${iso}" ;;
+	usb) burn_usb "${iso}" ;;
+	livecd) burn_dvd "${liveiso}" ;;
+	liveusb) burn_usb "${liveiso}" ;;
 	bootusb) burn_bootusb;;
 	*) echo "ERROR: unsupported option '${opt}'" ;;
 esac

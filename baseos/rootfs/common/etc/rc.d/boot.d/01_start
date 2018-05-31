@@ -19,9 +19,19 @@ do
 done
 swapon -a
 
+if test -d /etc/config -a ! -f /opt/config/system.cfg
+	then
+		cd /etc/config
+		cp -a . /opt/config
+	fi
+if test ! -f /opt/config/system.cfg
+	then
+		cat /etc/base_config/* > /opt/config/system.cfg
+	fi
+
 if test -f /opt/config/seed.rnd; then cat /opt/config/seed.rnd > /dev/urandom; fi
 
-mount -t tmpfs -o noexec,size=3M /ram /ram
+mount -t tmpfs -o noexec,size=3M RamDISK /ram
 cd /ram
 mkdir ssh root tmp etc run net-snmp
 chmod 777 run tmp
