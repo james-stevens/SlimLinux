@@ -111,6 +111,12 @@ With the "liveusb" the operating system and config are fixed at create time.
 With the "bootusb" the O/S & config are partitions on the USB stick, so can
 be updated.
 
+if you do not have "make" on your system, then
+
+$ ./burn <option>
+
+will pretty much do the same thing.
+
 
 
 If you change the "mkiso.cfg" file, or run "./configure" again, you
@@ -119,12 +125,14 @@ then need to run :-
 $ make clean all
 
 
+
 The "configure" utility checks you have the programs "mkisofs" and
 "isohybrid" that are needed for creating the ISO. If you do not have
 these you will have to refer to your documentation to add them.
 
 Or google "add mkisofo <name>" - where "<name>" is the name of the
 operating system you are using.
+
 
 
 
@@ -143,4 +151,3 @@ if you do not have "make" on your system, then
 $ ./mkiso <option>
 
 will pretty much do the same thing.
-
