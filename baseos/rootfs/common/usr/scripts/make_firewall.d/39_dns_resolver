@@ -1,0 +1,29 @@
+#! /bin/sh
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
+
+function add_external_resolvers()
+{
+if test "${staticResolvers}"
+    then
+        dns="${staticResolvers}"
+elif test -f /ram/dhcp/eth0
+    then
+        . /ram/dhcp/eth0
+        dns="${eth0_dns}"
+    fi
+
+if test "${dns}"
+    then
+        /usr/scripts/by_addr_type ${ipv} ${dns} | while read adr msk typ all
+            do
+                echo "-A INPUT -p udp -s ${all} --sport 53 --dport ${local} -m state --state ESTABLISHED,RELATED -j ACCEPT"
+                echo "-A OUTPUT -p udp -d ${all} --dport 53 --sport ${local} -j ACCEPT"
+            done
+    else
+        echo "-A INPUT -p udp --sport 53 --dport ${local} -m state --state ESTABLISHED,RELATED -j ACCEPT"
+        echo "-A OUTPUT -p udp --dport 53 --sport ${local} -j ACCEPT"
+    fi
+}

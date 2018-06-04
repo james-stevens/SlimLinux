@@ -19,6 +19,8 @@ if test "${dnsResolver}" = "Y"
 		echo "-A INPUT -p tcp --dport ${dns_local} --sport 53 -j ACCEPT"
 		echo "-A OUTPUT -p udp --sport ${dns_local} --dport 53 -j ACCEPT"
 		echo "-A OUTPUT -p tcp --sport ${dns_local} --dport 53 -j ACCEPT"
+	else
+		add_external_resolvers
 	fi
 	
 	

@@ -38,16 +38,8 @@ echo 1280 > /proc/sys/net/ipv4/tcp_base_mss
 
 /usr/scripts/make_firewall
 
-
-if test "${staticResolvers}"
-	then
-		svrs="${staticResolvers}"
-	else
-		svrs="8.8.8.8 8.8.4.4 208.67.220.220 208.67.222.222"
-	fi
-	
 {
-for svr in ${svrs}
+for svr in ${staticResolvers}
 do
 	echo "nameserver ${svr}"
 done

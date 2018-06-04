@@ -11,17 +11,18 @@ serverAdmin=admin@exmaple.net
 syslogToDisk=N
 # syslogSize=
 
-# ntpServers=
+ntpServers=pool.ntp.org
 # ntpAllow=
 # rdateServers=
 
 sshRemoteAllow="0/0"
 
-# pingAllow="0/0"
+pingAllow="0/0"
 firewallLogging=N
 
 keyboardMap=uk
 
+# if no 'static4GW' uses DHCP
 # static4GW=
 # static4IP=
 

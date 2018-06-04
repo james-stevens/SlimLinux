@@ -12,9 +12,6 @@ if test "${ntpServers}"
 				echo "-A OUTPUT -d ${all} -p udp --sport 123 -j ACCEPT"
 			done
 
-		/usr/scripts/by_addr_type ${ipv} ${ntpServers} | while read adr msk typ all
-			do
-				echo "-A INPUT -s ${all} -p udp --sport 123 --dport ${local} -j ACCEPT"
-				echo "-A OUTPUT -d ${all} -p udp --dport 123 --sport ${local} -j ACCEPT"
-			done
+		echo "-A INPUT -p udp --sport 123 --dport ${local} -m state --state ESTABLISHED,RELATED -j ACCEPT"
+		echo "-A OUTPUT -p udp --dport 123 --sport ${local} -j ACCEPT"
 	fi

@@ -22,9 +22,10 @@ case ${action} in
 			fi
 			
 		{
-		echo "${interface}_ip=${ip}"
-		echo "${interface}_subnet=${subnet}"
-		echo "${interface}_router=${router}"
+		echo "${interface}_ip=\"${ip}\""
+		echo "${interface}_subnet=\"${subnet}\""
+		echo "${interface}_router=\"${router}\""
+		echo "${interface}_dns=\"${dns}\""
 		} > /ram/dhcp/${interface}
 
 		echo "4 ${ip}/${mask} ${ip} ${mask}" > /ram/addrs
