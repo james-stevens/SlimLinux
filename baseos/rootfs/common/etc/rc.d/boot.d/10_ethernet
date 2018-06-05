@@ -9,7 +9,8 @@ ip link set eth0 up
 rm -f /ram/addrs
 awk '/^static[46]IP=/ { 
 	ipv=int(substr($0,7));
-	x=substr($0,index($0,"=")+1); gsub("\"","",x);
+	x=substr($0,index($0,"=")+1); 
+	'$'gsub("[\'''\"]","",x);
 	split(x,a,"/");
 
 	print ipv,x,a[1],a[2] >> "/ram/addrs"
@@ -55,7 +56,7 @@ if test "${static4IP}"
 
 awk '/^staticRoute=/ {
 	x=substr($0,index($0,"=")+1);
-	gsub("\"","",x);
+	'$'gsub("[\'''\"]","",x);
 	n=split(x,a," ");
 	if (index(a[1],":")>0) ip="-6"; else ip="-4";
 	print ip,a[1],a[2] 

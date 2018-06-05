@@ -224,7 +224,7 @@ if test "${dnsWithSecondary}" = "Y"
 
 		awk '/^dnsSecondary=/ {
 			x=substr($0,index($0,"=")+1);
-			gsub("\"","",x);
+			'$'gsub("[\'''\"]","",x);
 			n=split(x,a," ");
 
 			file=a[1];
@@ -246,7 +246,7 @@ if test "${dnsWithPrimary}" = "Y"
 
 		awk '/^dnsPrimary=/ {
 			x=substr($0,index($0,"=")+1);
-			gsub("\"","",x);
+			'$'gsub("[\'''\"]","",x);
 			n=split(x,a," ");
 
 			file=a[1];

@@ -11,7 +11,7 @@ if test -z "$1"
 	then
 		awk '/^auth_keys=/||/^root_keys=/ {
 			x=substr($0,index($0,"=")+1);
-			gsub("\"","",x);
+			'$'gsub("[\'''\"]","",x);
 			print x                 
 			}' ${syscfg} > ${dst}
 			
@@ -31,7 +31,7 @@ chmod 700 ${home}/.ssh
 
 awk '/^auth_keys=/||/^user_keys=/||/^'"${user}"'_keys=/ {
 	x=substr($0,index($0,"=")+1);
-	gsub("\"","",x);
+	'$'gsub("[\'''\"]","",x);
 	print x                 
 	}' ${syscfg} > ${dst}
 

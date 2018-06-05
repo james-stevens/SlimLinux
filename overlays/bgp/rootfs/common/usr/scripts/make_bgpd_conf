@@ -53,7 +53,7 @@ fi
 awk 'BEGIN { bgpWithAS112="'"${bgpWithAS112}"'"; }
 /^bgpPeers=/ {
 	x=substr($0,index($0,"=")+1);
-	gsub("\"","",x);
+	'$'gsub("[\'''\"]","",x);
 	n=split(x,a,",");
 	if (index(a[1],".")) {
 		printf "neighbor %s remote-as %d\n",a[1],a[2]
@@ -71,7 +71,7 @@ awk 'BEGIN { bgpWithAS112="'"${bgpWithAS112}"'"; }
 awk 'BEGIN { bgpWithAS112="'"${bgpWithAS112}"'"; }
 /^bgpPeers=/ {
 	x=substr($0,index($0,"=")+1);
-	gsub("\"","",x);
+	'$'gsub("[\'''\"]","",x);
 	split(x,a,",");
 	if (index(a[1],":")) {
 		printf "neighbor %s remote-as %d\n",a[1],a[2]
@@ -96,7 +96,7 @@ if test "${bgpWithAS112}" = "Y"
 awk 'BEGIN { bgpWithAS112="'"${bgpWithAS112}"'"; }
 /^bgpPeers=/ {
 	x=substr($0,index($0,"=")+1);
-	gsub("\"","",x);
+	'$'gsub("[\'''\"]","",x);
 	split(x,a,",");
 	if (index(a[1],":")) {
 		printf "neighbor %s activate\n",a[1]

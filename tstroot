@@ -18,7 +18,7 @@ mount -o noexec -t sysfs sys ROOT/sys
 mount -t tmpfs -o noexec,size=3M ram ROOT/ram
 mount -t tmpfs -o noexec,size=3M ram ROOT/opt/config
 mount -t tmpfs -o noexec,size=3M ram ROOT/opt/data
-mkdir ROOT/ram/run ROOT/ram/tmp ROOT/ram/root
+mkdir ROOT/ram/run ROOT/ram/tmp ROOT/ram/root ROOT/ram/db
 chmod 700 ROOT/ram/root
 chown 0:0 ROOT/ram/tmp ROOT/ram/run ROOT/ram/root
 chmod 777 ROOT/ram/tmp ROOT/ram/run

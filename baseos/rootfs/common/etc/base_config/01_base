@@ -1,4 +1,6 @@
-rootPassword=77IE6wmOHF4kE
+rootPassword='$6$9WsilShC$oWFLGn4yXPkEqKknzSOFmyoclyBHOipJ9HuB8SMS3hSpcX.2hFufKcmagOIL06LbR6IW91hGLjuSV0XMZBAxv1'
+
+extraUser='slim:users,sudo $6$Um7fzyvVbgwKXAL4$75An/.rIw0afYoZGqijK36BU4XmkRSeK3v/VRZxSfs2TyZfEDlXcUHHdjUQ9LGiDc1zxoAPqxM4f0.lVm0Dl.0 80'
 
 allowRootSSH=Y
 allowConsoleLogin=Y

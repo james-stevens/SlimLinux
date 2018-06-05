@@ -24,7 +24,7 @@ if test "${runningBGPd}" = "Y"
 				awk -F= 'BEGIN { ipv="'"${ipv}"'" }
 				/^bgpPeers/ {
 					x=substr($0,index($0,"=")+1);
-					gsub("\"","",x);
+					'$'gsub("[\'''\"]","",x);
 					split(x,a,",");
 					ip = a[1];
 					if ((((ipv==4)&&(index(ip,".")))||((ipv==6)&&(index(ip,":"))))) {

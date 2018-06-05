@@ -18,16 +18,22 @@ nobody:x:9999:9999::/tmp:/bin/false' > /ram/etc/passwd
 
 chmod 444 /ram/etc/passwd
 
-echo 'root:x:0:root
-nobody:x:9999:nobody' >  /ram/etc/group
+{
+echo 'root:x:0:root'
+echo 'nobody:x:9999:nobody' 
+} >  /ram/etc/group
 chmod 444 /ram/etc/group
 
 
-awk 'BEGIN { uid=101; } 
+awk 'BEGIN { 
+	uid=101;
+	rev["users"]=100
+	rev["sudo"]=20
+	} 
 	/^extraUser=/ {
 		x=substr($0,index($0,"=")+1);
-		gsub("\"","",x);
-		n=split(x,a," ");
+		'$'gsub("[\'''\"]","",x);
+		n=split(x,a," ");''
 
 		user=a[1]; grp="100";
 
@@ -35,15 +41,31 @@ awk 'BEGIN { uid=101; }
 		
 		i=index(user,":");
 		if (i>0) {
+			g = substr(user,i+1);
 			user=substr(user,1,i-1);
-			grp=id; 
-			printf "%s:x:%s:%s\n",substr(a[1],i+1),id,user >> "/ram/etc/group"
+			
+			if (index(g,",")==0) {
+				grp=id; 
+				printf "%s:x:%s:%s\n",g,id,user >> "/ram/etc/group"
+				}
+			else
+				{
+				n = split(g,ga,",");
+				grp="";
+				for(gl=1;gl<=n;gl++) {
+					if (ga[gl]=="users") all = all _ "," _ user
+					else if (ga[gl]=="sudo") sudo = sudo _ "," _ user
+					else if (grp=="") {
+						printf "%s:x:%s:%s\n",ga[gl],id,user >> "/ram/etc/group"
+						grp=id;
+						}
+					}
+				if (grp=="") grp=rev[ga[1]];
+				if (grp=="") grp=100;
+				}
 			}
 		else
-			{
-			all = all _ sep _ user
-			sep=","
-			}
+			all = all _ "," _ user
 
 		home="/ram/home/" _ user; shell="/sbin/sh";
 		if (a[2]=="-") 
@@ -56,7 +78,10 @@ awk 'BEGIN { uid=101; }
 		if (home!="/tmp") print user,grp,id,home
 
 	} END {
-		if (all!="") printf "users:x:100:%s\n",all >> "/ram/etc/group"
+	
+		if (all!="") printf "users:x:100:%s\n",substr(all,2) >> "/ram/etc/group"
+		if (sudo!="") printf "sudo:x:20:%s\n",substr(sudo,2) >> "/ram/etc/group"
+		
 	}' ${syscfg} | while read user grp uid home
 	do
 		mkdir -m 700 -p "${home}"
