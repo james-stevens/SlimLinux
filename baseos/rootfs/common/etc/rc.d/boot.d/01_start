@@ -13,10 +13,6 @@ mount -o noexec -t devpts /dev/pts /dev/pts
 fsck -A -y
 mount -a
 mount -ro remount,noatime /
-awk '{ if ($3=="swap") print $1 }' /etc/fstab | while read dev
-do
-	mkswap ${dev}
-done
 swapon -a
 
 if test -d /etc/config -a ! -f /opt/config/system.cfg

@@ -293,10 +293,10 @@ function burn_bootusb()
 	p4_cmd="mkfs.${p4_type}"
 
 	{
-	mkfs.ext2 -m 0 -q ${dev}1
-	mkswap ${dev}3
-	mkfs.ext2 -m 0 -q ${dev}2
-	echo y | ${p4_cmd} --label SlimData ${dev}4
+	mkfs.ext2 -L SlimRootFS -m 0 -q ${dev}1
+	mkswap -L SlimSwap ${dev}3
+	mkfs.ext2 -L SlimConfig -m 0 -q ${dev}2
+	echo y | ${p4_cmd} -l SlimData ${dev}4
 	} > /dev/null 2>&1
 
 	rootid=$(tune2fs -l ${dev}1 | awk '/^Filesystem UUID:/ { print $NF }')

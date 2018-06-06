@@ -280,8 +280,8 @@ if test "${instype}" = "Continue"
 
 
 {
-mke2fs -m 0 -q ${disk}1 >/dev/null 2>&1
-mkswap ${disk}3
+mke2fs -L SlimRootFS -m 0 -q ${disk}1 >/dev/null 2>&1
+mkswap -L SlimSwap ${disk}3
 } >/dev/tty4 2>&1
 
 showmsg "Installing the Operating System"
@@ -317,7 +317,7 @@ sync
 
 if test "${instype}" = "Continue"
 	then
-		mke2fs -m 0 -q ${disk}2 >/dev/null 2>&1
+		mke2fs -L SlimConfig -m 0 -q ${disk}2 >/dev/null 2>&1
 		mount -t ext2 -no nodiratime,noatime ${disk}2 /mnt/opt/config
 
 		cd /mnt/opt/config
@@ -367,7 +367,7 @@ if test "${instype}" = "Continue"
 if test "${instype}" = "Continue"
 	then
 		showmsg "Formatting the data partition"
-		mkfs.reiser ${disk}4
+		mkfs.reiser -l SlimData ${disk}4
 		if test -f ${datafs}
 			then
 				showmsg "Installing the Data"
