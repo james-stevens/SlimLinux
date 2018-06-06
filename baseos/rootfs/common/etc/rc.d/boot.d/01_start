@@ -41,6 +41,13 @@ touch etc/adjtime
 chown 0:0 /opt/config/system.cfg /ram/ssh /ram/root
 chmod 600 /opt/config/system.cfg /ram/ssh /ram/root
 
+if test -f /opt/config/busybox.conf
+	then
+		ln -s /opt/config/busybox.conf /ram/etc/busybox.conf
+	else
+		touch /ram/etc/busybox.conf
+	fi
+
 touch /ram/just-booted
 
 mkdir -m 700 root/.ssh

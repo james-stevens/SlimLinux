@@ -1,6 +1,6 @@
 Defaults        env_reset
 Defaults        mail_badpass
-Defaults        secure_path="/sbin"
+Defaults        secure_path="/sbin:/usr/bin"
 root    ALL=(ALL:ALL) ALL
-%admin ALL=(ALL) ALL
 %sudo   ALL=(ALL:ALL) ALL
+slim ALL = (root) NOPASSWD: /usr/bin/admin

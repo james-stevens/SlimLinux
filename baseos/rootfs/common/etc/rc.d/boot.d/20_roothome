@@ -20,6 +20,7 @@ alias ifc=\"ip addr | grep -E '(,UP,| scope )'\"
 
 export EXINIT='set tabstop=4 ai'
 export PATH=/sbin
+export TZ=':/etc/localtime'
 
 "
 echo "if tty -s ; then echo -ne '\e]2;${serverHostname}\a'; fi"

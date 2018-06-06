@@ -22,6 +22,10 @@ if ! test -f /opt/config/ssh/sshd_config
 	then
 		tmp=/ram/tmp/make_sshd_config_$$_$RANDOM
 		{
+		if test -d /etc/pam.d/.
+			then
+				echo "UsePAM yes"
+			fi
 		if test "${allowRootSSH}" = "Y"
 			then
 				echo "PermitRootLogin Yes"
