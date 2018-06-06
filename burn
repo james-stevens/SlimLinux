@@ -284,7 +284,7 @@ function burn_bootusb()
 	mkfs.ext2 -m 0 -q ${dev}1
 	mkswap ${dev}3
 	mkfs.ext2 -m 0 -q ${dev}2
-	echo y | ${p4_cmd} ${dev}4
+	echo y | ${p4_cmd} --label SlimData ${dev}4
 	} > /dev/null 2>&1
 
 	rootid=$(tune2fs -l ${dev}1 | awk '/^Filesystem UUID:/ { print $NF }')
@@ -305,9 +305,13 @@ function burn_bootusb()
 	cp -a ${dev} ${dev}[1234] dev
 	mknod dev/sda1 b 8 1
 
+	root_uuid="$(sfdisk --part-uuid ${dev} 1)"
+	data_uuid="$(blkid ${dev}2 | awk '{ x=$0; x=substr(x,index(x,"UUID=")+6); x=substr(x,1,index(x,"\"")-1); print x }')"
+	data_uuid="$(blkid ${dev}4 | awk '{ x=$0; x=substr(x,index(x,"UUID=")+6); x=substr(x,1,index(x,"\"")-1); print x }')"
+
 	{
-	echo "append=\" rootfstype=ext2 rootdelay=5\""
-	grep -v "^append" etc/lilo.conf
+	echo "append=\" rootfstype=ext2 rootdelay=5\" root=PARTUUID=${root_uuid}"
+	awk '{ if (($1!="append")&&($1"="root")) print }' etc/lilo.conf
 	} > etc/lilo.new
 	mv etc/lilo.new etc/lilo.conf
 
