@@ -228,6 +228,18 @@ function burn_bootusb()
 			exit 0
 		fi
 
+	if ! sfdisk --help >/dev/null 2>&1
+		then
+			echo "ERROR: could not find 'sfdisk'"
+			exit 0
+		fi
+
+	if ! sfdisk --help 2>&1 | grep -q part-uuid
+		then
+			echo "ERROR: 'sfdisk' version is too old and does not support '--part-uuid'"
+			exit 0
+		fi
+
 	cd output
 	rm -rf mnt
 	if test -d mnt
@@ -310,8 +322,8 @@ function burn_bootusb()
 	data_uuid="$(blkid ${dev}4 | awk '{ x=$0; x=substr(x,index(x,"UUID=")+6); x=substr(x,1,index(x,"\"")-1); print x }')"
 
 	{
-	echo "append=\" rootfstype=ext2 rootdelay=5\" root=PARTUUID=${root_uuid}"
-	awk '{ if (($1!="append")&&($1"="root")) print }' etc/lilo.conf
+	echo "append = \" rootfstype=ext2 rootdelay=5 root=PARTUUID=${root_uuid}\""
+	awk '{ if (($1!="append")&&($1!="root")) print }' etc/lilo.conf
 	} > etc/lilo.new
 	mv etc/lilo.new etc/lilo.conf
 
@@ -323,7 +335,7 @@ function burn_bootusb()
 
 	chroot ${parent}/output/mnt lilo -c -C etc/stick.lilo >/dev/null 2>&1
 
-	rm -f dev/* ram/tmp/* etc/stick.lilo
+	rm -f dev/* ram/tmp/*
 	rmdir ram/tmp
 
 	cd ${parent}
