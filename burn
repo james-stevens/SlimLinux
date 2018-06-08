@@ -234,12 +234,6 @@ function burn_bootusb()
 			exit 0
 		fi
 
-	if ! sfdisk --help 2>&1 | grep -q part-uuid
-		then
-			echo "ERROR: 'sfdisk' version is too old and does not support '--part-uuid'"
-			exit 0
-		fi
-
 	cd output
 	rm -rf mnt
 	if test -d mnt
@@ -317,12 +311,31 @@ function burn_bootusb()
 	cp -a ${dev} ${dev}[1234] dev
 	mknod dev/sda1 b 8 1
 
-	root_uuid="$(sfdisk --part-uuid ${dev} 1)"
-	data_uuid="$(blkid ${dev}2 | awk '{ x=$0; x=substr(x,index(x,"UUID=")+6); x=substr(x,1,index(x,"\"")-1); print x }')"
-	data_uuid="$(blkid ${dev}4 | awk '{ x=$0; x=substr(x,index(x,"UUID=")+6); x=substr(x,1,index(x,"\"")-1); print x }')"
+	if sfdisk --help 2>&1 | grep -q part-uuid
+		then
+			root_partuuid="$(sfdisk --part-uuid ${dev} 1)"
+		else
+			root_partuuid="$(blkid ${dev}1 | awk '{
+				x=substr($0,index($0,"PARTUUID=\"")+10);
+				print toupper(substr(x,1,index(x,"\"")-1));
+				}')"
+		fi
+
+	if test "${root_partuuid}"
+		then
+			more_append="root=PARTUUID=${root_partuuid}"
+		else
+			more_append="root=/dev/sda1"
+
+			echo "***** WARNING: unable to get PARTUUID becuase your Linux-Utils are too old"
+			echo " Using 'root=/dev/sda1' instead - this is only guaranteed to work if the"
+			echo "   USB stick is the only disk in the machine when it is booted"
+			blkid -v
+			echo ""
+		fi
 
 	{
-	echo "append = \" rootfstype=ext2 rootdelay=5 root=PARTUUID=${root_uuid}\""
+	echo "append = \" rootfstype=ext2 rootdelay=5 ${more_append}\""
 	awk '{ if (($1!="append")&&($1!="root")) print }' etc/lilo.conf
 	} > etc/lilo.new
 	mv etc/lilo.new etc/lilo.conf
