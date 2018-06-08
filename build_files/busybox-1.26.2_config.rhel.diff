@@ -1,0 +1,4 @@
+22c22
+< # CONFIG_PAM is not set
+---
+> CONFIG_PAM=y

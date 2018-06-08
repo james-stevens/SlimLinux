@@ -1,4 +1,1 @@
-auth            substack        system-auth
-account         include         system-auth
-password        include         system-auth
-session         include         system-auth
+default
