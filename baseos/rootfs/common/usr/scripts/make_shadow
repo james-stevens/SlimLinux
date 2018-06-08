@@ -1,4 +1,4 @@
-#! /bin/sh
+! /bin/sh
 #
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
@@ -27,8 +27,11 @@ chmod 444 /ram/etc/group
 
 awk 'BEGIN { 
 	uid=101;
-	rev["users"]=100
-	rev["sudo"]=20
+	gid["users"]=100
+	gid["sudo"]=20
+	ngrp=0;
+	grplst[ngrp++] = "users";
+	grplst[ngrp++] = "sudo";
 	} 
 	/^extraUser=/ {
 		x=substr($0,index($0,"=")+1);
@@ -53,15 +56,14 @@ awk 'BEGIN {
 				n = split(g,ga,",");
 				grp="";
 				for(gl=1;gl<=n;gl++) {
-					if (ga[gl]=="users") all = all _ "," _ user
-					else if (ga[gl]=="sudo") sudo = sudo _ "," _ user
+					if (gid[ga[gl]]!="") usrs[ga[gl]] = usrs[ga[gl]] _ "," _ user
 					else if (grp=="") {
 						printf "%s:x:%s:%s\n",ga[gl],id,user >> "/ram/etc/group"
 						grp=id;
 						}
 					}
-				if (grp=="") grp=rev[ga[1]];
-				if (grp=="") grp=100;
+				if (grp=="") grp=gid[ga[1]];
+				if (grp=="") { grp=100; usrs["users"] = usrs["users"]  _ "," _ user }
 				}
 			}
 		else
@@ -79,9 +81,13 @@ awk 'BEGIN {
 
 	} END {
 	
-		if (all!="") printf "users:x:100:%s\n",substr(all,2) >> "/ram/etc/group"
-		if (sudo!="") printf "sudo:x:20:%s\n",substr(sudo,2) >> "/ram/etc/group"
-		
+		for(loop=0;loop<ngrp;loop++)
+			if (usrs[grplst[loop]]!="") 
+				printf "%s:x:%d:%s\n",
+					grplst[loop],
+					gid[grplst[loop]],
+					substr(usrs[grplst[loop]],2) >> "/ram/etc/group"
+
 	}' ${syscfg} | while read user grp uid home
 	do
 		mkdir -m 700 -p "${home}"
