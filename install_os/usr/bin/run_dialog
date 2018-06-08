@@ -292,6 +292,8 @@ cd /mnt
 
 cd /mnt
 tar xf ${image}
+cp -a /cdrom/isolinux/kernel boot/kernel
+chmod 400 boot/kernel
 cd /
 mount -t devtmpfs /mnt/dev /mnt/dev
 mount -t proc /mnt/proc /mnt/proc

@@ -145,7 +145,6 @@ if ! test -f ${initrd}
 		do
 			find ${dir} -type f -exec chmod 555 {} ';'
 		done
-		chmod 500 usr/bin/admin
 
 		chroot ${output}/install_os.dd_mnt ldconfig
 		rm -f sbin/ldconfig
@@ -185,7 +184,7 @@ function fix_os_perms()
 	find ${dirs} -type f -exec chmod 555 {} ';'
 
 	chmod +s sbin/su sbin/sudo
-	chmod 400 boot/kernel
+	chmod 500 usr/bin/admin
 
 	cd ${parent}
 	if test -d CONFIG
@@ -321,8 +320,6 @@ if ! test -f ${rootfs}
 			done
 
 		if test "${overlays}"; then add_overlays; fi
-
-		cp ${kernel} ${rootdir}/boot/kernel
 
 		cd ${parent}
 		du -sh ${rootdir}
@@ -544,7 +541,7 @@ if test "${remade_rootfs}" = "Y"
 		} > ${isobase}/readme.txt
 
 
-		do_sz=$[${sz}+(${sz}/5)]
+		do_sz=$[${sz}+(${sz}/2)]
 		{
 		echo "default kernel initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 ramdisk_size=${do_sz} ro root=/dev/ram0"
 		echo "prompt 0"
