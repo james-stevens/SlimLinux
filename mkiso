@@ -152,18 +152,28 @@ if ! test -f ${initrd}
 		cd ${parent}
 
 		num=$(find ${output}/install_os.dd_mnt | wc -l)
-		sz=$(du -s ${output}/install_os.dd_mnt | cut -f 1)
-		sz=$[${sz}+(4*${num})]
 
 		sync
 		umount ${output}/install_os.dd_mnt
 		sync
 		rmdir ${output}/install_os.dd_mnt
+
+		ins_sz=$(du -s ${output}/install_os.dd | cut -f 1)
 		gzip -9 ${output}/install_os.dd
 
 		cp -a ${output}/install_os.dd.gz ${initrd}
 
+		ins_gsz=$(du -s ${initrd} | cut -f 1)
+
 		rm -f ${output}/install_os.dd.gz
+
+		ins_do_sz=$[${ins_sz}+${ins_gsz}+10]
+		{
+		echo "default kernel initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 ramdisk_size=${ins_do_sz} ro root=/dev/ram0"
+		echo "prompt 0"
+		echo "timeout 0"
+		echo "display message.txt"
+		} > ${isobase}/isolinux/isolinux.cfg
 	fi
 
 
@@ -364,16 +374,6 @@ if ! test -d ${isobase}/random
 	fi
 
 
-if test "${sz}"
-	then
-		do_sz=$[${sz}+${sz}]
-		{
-		echo "default kernel initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 ramdisk_size=${do_sz} ro root=/dev/ram0"
-		echo "prompt 0"
-		echo "timeout 0"
-		echo "display message.txt"
-		} > ${isobase}/isolinux/isolinux.cfg
-	fi
 
 
 echo "Making ISO / USB image"
@@ -447,12 +447,12 @@ if test "${remade_rootfs}" = "Y"
 
 		echo "---> Building the Live-O/S"
 
-		sz=$(du -s ${rootdir} | cut -f 1)
-		num=$(find ${rootdir} | wc -l)
+		root_sz=$(du -s ${rootdir} | cut -f 1)
+		root_num=$(find ${rootdir} | wc -l)
 		blk=1024
 
-		do_sz=$[${sz}+(${num}*4)+(${sz}/10)]
-		do_num=$[${num}+(${num}/8)]
+		root_do_sz=$[${root_sz}+(${root_sz}/5)]
+		root_do_num=$[${root_num}+(${root_num}/8)]
 
 		file="${output}/live.dd"
 		mnt="${output}/live.mnt"
@@ -460,8 +460,8 @@ if test "${remade_rootfs}" = "Y"
 		umount ${mnt} 2>/dev/null
 		rm -rf ${file} ${mnt} ${file}.gz
 
-		dd if=/dev/zero bs=${blk} count=${do_sz} of=${file} >/dev/null 2>&1
-		mke2fs -q -N ${do_num} -m 0 -F ${file}
+		dd if=/dev/zero bs=${blk} count=${root_do_sz} of=${file} >/dev/null 2>&1
+		mke2fs -q -N ${root_do_num} -m 0 -F ${file}
 		mkdir ${mnt}
 		mount -o loop ${file} ${mnt}
 		cd ${mnt}
@@ -507,7 +507,6 @@ if test "${remade_rootfs}" = "Y"
 
 		cfgsz=$[${cfgsz}+(${cfgsz}/10)+(${cfgnum}*4)]
 
-
 		if cmp -s ${mnt}/etc/fstab baseos/rootfs/common/etc/fstab 
 			then
 				{
@@ -523,11 +522,13 @@ if test "${remade_rootfs}" = "Y"
 		echo "---> Building the Live-ISO"
 
 		sync
+		live_sz=$(du -s ${file} | cut -f 1)
 		gzip -9 ${file}
 
 		cd ${parent}
 		cp ${file}.gz ${initrd}
 		rm ${file}.gz
+		live_gsz=$(du -s ${initrd} | cut -f 1)
 
 		{
 		echo "Slim-Linux ISO LiveCD"
@@ -541,9 +542,9 @@ if test "${remade_rootfs}" = "Y"
 		} > ${isobase}/readme.txt
 
 
-		do_sz=$[${sz}+(${sz}/2)]
+		live_do_sz=$[${live_sz}+${live_gsz}+10]
 		{
-		echo "default kernel initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 ramdisk_size=${do_sz} ro root=/dev/ram0"
+		echo "default kernel initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 ramdisk_size=${live_do_sz} ro root=/dev/ram0"
 		echo "prompt 0"
 		echo "timeout 0"
 		echo "display message.txt"

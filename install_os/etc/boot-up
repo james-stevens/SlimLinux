@@ -1,17 +1,15 @@
 #! /bin/sh
 
-mount -rno remount /
-
+echo "========================================================"
 echo "Running boot-script"
 
 mount -nt proc /proc /proc
 mount -nt sysfs /sys /sys
 mount -t tmpfs -no size=3M /tmp /tmp
+mount -rno remount /
 
 hostname install.zz.
 
 echo "" > /dev/tty5
 
 switch_screen 5
-
-/usr/bin/kbdrate -r 2 -d 1000
