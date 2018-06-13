@@ -130,7 +130,7 @@ fi
 
 if test -f /opt/config/rndc.conf
 	then
-		cp /opt/config/rndc.conf /ram/rndc.conf
+		cp /opt/config/rndc.conf /ram/etc/rndc.conf
 elif test "${dnsRndcKey}"
 	then
 		echo "key \"rndc-key\" { algorithm hmac-md5; secret \"${dnsRndcKey}\"; };"
@@ -161,7 +161,7 @@ elif test "${dnsRndcKey}"
 		{
 		echo "key \"rndc-key\" { algorithm hmac-md5; secret \"${dnsRndcKey}\"; };"
 		echo "options { default-key \"rndc-key\"; default-server 127.0.0.1; default-port 953; };"
-		} > /ram/rndc.conf
+		} > /ram/etc/rndc.conf
 fi
 
 

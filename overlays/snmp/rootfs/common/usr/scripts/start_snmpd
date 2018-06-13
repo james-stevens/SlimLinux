@@ -5,6 +5,8 @@
 
 . /usr/scripts/opts
 
+mkdir /ram/net-snmp
+
 killall -q snmpd
 
 if test -f /opt/config/snmpd.conf

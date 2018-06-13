@@ -289,6 +289,7 @@ showmsg "Installing the Operating System"
 {
 mount -t ext2 -no nodiratime,noatime ${disk}1 /mnt
 cd /mnt
+rmdir lost+found; mkdir lost+found
 
 cd /mnt
 tar xf ${image}

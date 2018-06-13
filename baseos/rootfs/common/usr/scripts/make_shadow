@@ -63,11 +63,11 @@ awk 'BEGIN {
 						}
 					}
 				if (grp=="") grp=gid[ga[1]];
-				if (grp=="") { grp=100; usrs["users"] = usrs["users"]  _ "," _ user }
+				if (grp=="") { grp=100; usrs["users"] = usrs["users"] _ "," _ user }
 				}
 			}
 		else
-			all = all _ "," _ user
+			usrs["users"] = usrs["users"] _ "," _ user
 
 		home="/ram/home/" _ user; shell="/sbin/sh";
 		if (a[2]=="-") 

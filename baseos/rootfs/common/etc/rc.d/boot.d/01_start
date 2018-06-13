@@ -29,9 +29,9 @@ if test -f /opt/config/seed.rnd; then cat /opt/config/seed.rnd > /dev/urandom; f
 
 mount -t tmpfs -o noexec,size=3M RamDISK /ram
 cd /ram
-mkdir ssh root tmp etc run net-snmp db
-chmod 777 run tmp
-chmod +t run tmp
+mkdir ssh root tmp etc var var/run var/db var/lib
+chmod 777 var/run tmp
+chmod +t var/run tmp
 touch etc/adjtime
 
 chown 0:0 /opt/config/system.cfg /ram/ssh /ram/root

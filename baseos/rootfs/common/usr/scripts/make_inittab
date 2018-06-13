@@ -9,7 +9,7 @@ tmp=/ram/tmp/make_inittab_$$_$RANDOM
 
 for file in /usr/scripts/make_inittab.d/*; do . ${file}; done > ${tmp}
 
-dst="/ram/inittab"
+dst="/ram/etc/inittab"
 if ! cmp -s ${tmp} ${dst}
 	then
 		mv ${tmp} ${dst}
