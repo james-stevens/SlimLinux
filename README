@@ -34,12 +34,13 @@ libs, and busybox – so that's about all you get in our base O/S.
 Current binary base distributions supported are
 	Slackware x64 v14.2
 	Redhat x64 v7.5
+	SUSE-EL v12 SP3
 
-When you look at the “Redhat” or “Slackware” SlimLinux you
-will not see an operating system that looks like the one it is
-based on. The base gives the SlimLinux full binary compatibility
-with the base, but the structure of the system and what utilities
-are available will be different.
+When you look at the “Redhat”, “SUSE” or “Slackware” 
+SlimLinux you will not see an operating system that looks like the
+one it is based on. The base gives the SlimLinux full binary 
+compatibility with the base, but the structure of the system and 
+what utilities are available will be different.
 
 We have been running public facing internet server applications,
 based on Slackware SlimLinux, on both physical & virtual servers
