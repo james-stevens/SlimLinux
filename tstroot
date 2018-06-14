@@ -26,6 +26,7 @@ chmod +t ROOT/ram/tmp ROOT/ram/run
 
 cat ROOT/etc/base_config/* > ROOT/opt/config/system.cfg
 
+chroot ROOT ldconfig
 chroot ROOT /usr/scripts/make_shadow
 chroot ROOT /etc/rc.d/boot.d/20_roothome
 export HOME="/ram/root"

@@ -305,9 +305,9 @@ mkdir -p /mnt/opt/config
 mkdir -p /mnt/opt/data
 
 sync
-chroot /mnt lilo
-sync
 chroot /mnt ldconfig
+sync
+chroot /mnt lilo
 sync
 
 mount -rno remount /mnt

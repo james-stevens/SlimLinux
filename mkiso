@@ -185,11 +185,15 @@ function fix_os_perms()
 	find . -type f -exec chmod 644 {} ';'
 	find . -type d -exec chmod 755 {} ';'
 
-	dirs="lib64 etc/rc.d sbin usr/sbin usr/bin usr/lib64/xtables usr/scripts etc/acpi"
-	if test -d usr/lib64/security
-		then
-			dirs="${dirs} usr/lib64/security"
-		fi
+	dirs=""
+	maybe="usr/lib64/security lib64 etc/rc.d sbin usr/sbin usr/bin usr/lib64/xtables usr/scripts etc/acpi"
+	for d in ${maybe}
+		do
+			if test -d usr/lib64/security
+				then
+					dirs="${dirs} ${d}"
+				fi
+		done
 
 	find ${dirs} -type f -exec chmod 555 {} ';'
 
@@ -494,7 +498,9 @@ if test "${remade_rootfs}" = "Y"
 		mkdir -p ${mnt}/ram/ssh
 		chmod 700 ${mnt}/ram/ssh
 		echo "root:x:0:0::/root:/bin/false" > ${mnt}/ram/etc/passwd
+		chroot ${mnt} /sbin/ldconfig
 		chroot ${mnt} ssh-keygen -A >/dev/null 2>&1
+		rm ${mnt}/sbin/ldconfig
 
 		cd ${mnt}/ram
 		mv ssh ${mnt}/etc/config

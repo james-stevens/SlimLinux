@@ -303,8 +303,7 @@ function burn_bootusb()
 	cd output/mnt
 	tar xf ${root}
 
-	cd ${parent}
-	chroot output/mnt ldconfig
+	chroot ${parent}/output/mnt ldconfig
 
 	cd output/mnt
 	mkdir ram/tmp
