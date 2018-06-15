@@ -307,6 +307,10 @@ function burn_bootusb()
 	chroot ${mnt} ldconfig
 
 	cd ${mnt}
+	rmdir lost+found; mkdir lost+found
+
+	cp ${parent}/iso/isolinux/kernel ${mnt}/boot/kernel
+
 	mkdir ram/tmp
 	cp -a ${dev} ${dev}[1234] dev
 	mknod dev/sda1 b 8 1
