@@ -242,6 +242,7 @@ function burn_bootusb()
 			exit 0
 		fi
 	cd ${parent}
+	mnt="${parent}/output/mnt"
 
 	choose_usb
 
@@ -297,15 +298,15 @@ function burn_bootusb()
 
 	echo "---> Installing Operating System"
 
-	mkdir output/mnt
-	mount ${dev}1 output/mnt
+	mkdir ${mnt}
+	mount ${dev}1 ${mnt}
 
-	cd output/mnt
+	cd ${mnt}
 	tar xf ${root}
 
-	chroot ${parent}/output/mnt ldconfig
+	chroot ${mnt} ldconfig
 
-	cd output/mnt
+	cd ${mnt}
 	mkdir ram/tmp
 	cp -a ${dev} ${dev}[1234] dev
 	mknod dev/sda1 b 8 1
@@ -345,21 +346,21 @@ function burn_bootusb()
 	grep -v '^boot' etc/lilo.conf
 	} > etc/stick.lilo
 
-	chroot ${parent}/output/mnt lilo -c -C etc/stick.lilo >/dev/null 2>&1
+	chroot ${mnt} lilo -c -C etc/stick.lilo >/dev/null 2>&1
 
 	rm -f dev/* ram/tmp/*
 	rmdir ram/tmp
 
 	cd ${parent}
-	mkdir -p output/mnt/opt/config
-	mkdir -p output/mnt/opt/data
+	mkdir -p ${mnt}/opt/config
+	mkdir -p ${mnt}/opt/data
 
 	mount -ro remount ${dev}1
 
 	echo "---> Installing Data & Config"
 
-	mount ${dev}2 output/mnt/opt/config
-	cd output/mnt/opt/config
+	mount ${dev}2 ${mnt}/opt/config
+	cd ${mnt}/opt/config
 	rm -rf lost+found
 	mkdir lost+found
 	dd if=/dev/urandom of=seed.rnd bs=512 count=1 >/dev/null 2>&1
@@ -372,7 +373,7 @@ function burn_bootusb()
 		fi
 	if ! test -f system.cfg
 		then
-			cat ${parent}/output/mnt/etc/base_config/* > system.cfg
+			cat ${mnt}/etc/base_config/* > system.cfg
 		fi
 	chown -R 0:0 .
 	chmod 600 system.cfg
@@ -384,8 +385,8 @@ function burn_bootusb()
 	file="${parent}/iso/data.txz"
 	if test -f ${file}
 		then
-			mount ${dev}4 output/mnt/opt/data
-			cd output/mnt/opt/data
+			mount ${dev}4 ${mnt}/opt/data
+			cd ${mnt}/opt/data
 			tar xf ${file}
 			sync
 			cd ${parent}
@@ -401,7 +402,7 @@ function burn_bootusb()
 
 	cd ${parent}
 	for x in 2 4 1; do ${umount} ${dev}${x}; done >/dev/null 2>&1
-	rmdir output/mnt
+	rmdir ${mnt}
 
 	hdparm -f ${dev} > /dev/null 2>&1
 
