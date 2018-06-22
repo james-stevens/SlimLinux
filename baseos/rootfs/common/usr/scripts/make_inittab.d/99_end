@@ -1,1 +1,0 @@
-echo "Z99:5:wait:/usr/scripts/server_up >/tmp/server_up.log 2>&1"

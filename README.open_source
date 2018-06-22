@@ -1,0 +1,53 @@
+These are the names of the source files that were downloaded
+to create executables and libraries that were not taken from
+the base distribution.
+
+Including access to this source code is a condition of most
+open source lisences.
+
+We would have included the actual files themselves, but
+github *really* doesn't like you including large files
+and there is a size limit on each project.
+
+However, if you google these file names, getting the 
+original file isn't hard.
+
+If you are having trouble finding any, please ask and we
+can get you a copy - no problems.
+
+bind-9.11.3.tar.gz
+	./configure --without-libjson --enable-shared --enable-full-report --without-gost
+
+busybox-1.26.2.tar.bz2
+	: use provided config
+
+haveged-1.9.2.tar.gz
+	./configure
+
+lilo-24.2.tar.gz
+	make
+
+linux-4.14.43.tar.xz
+	: use provided config
+
+net-snmp-5.7.3.tar.gz
+	./configure --disable-embedded-perl
+
+Python-3.6.5.tar.xz
+	./configure --prefix=/opt/python --enable-optimizations --enable-shared
+
+openssh-7.7p1.tar.gz
+	suse & rhel : ./configure --sysconfdir=/etc/ssh --with-pam
+	      slack : ./configure --sysconfdir=/etc/ssh
+
+quagga-1.2.2.tar.gz
+	 suse: ./configure --disable-vtysh
+	slack: ./configure --disable-nhrpd
+
+sudo-1.8.23.tar.gz
+	suse & rhel : ./configure --enable-pam-session --with-pam --with-pam-login
+
+sysvinit-2.89.tar.bz2
+util-linux-2.32-rc2.tar.xz
+	suse & rhel : ./configure --enable-su --with-pam
+	      slack : ./configure --enable-su

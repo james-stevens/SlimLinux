@@ -1,9 +1,0 @@
-#! /bin/sh
-#
-# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
-# see License.txt for details
-
-. /usr/scripts/opts
-
-action="$1"
-for file in /usr/scripts/udhcpc.script.d/*; do . ${file}; done

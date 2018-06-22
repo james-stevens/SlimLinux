@@ -3,7 +3,7 @@ id:5:initdefault:
 ca::ctrlaltdel:/sbin/reboot -f
 
 l0:0:wait:/sbin/halt -f
-l6:6:wait:/etc/reboot -f
+l6:6:wait:/sbin/reboot -f
 
 si:S:sysinit:/etc/boot-up
 
@@ -12,6 +12,5 @@ c3:2345:respawn:/sbin/sh < /dev/tty3 > /dev/tty3 2>/dev/tty3
 
 sl:2345:respawn:/sbin/syslogd -n -C100
 kl:2345:respawn:/sbin/klogd -n
-
 
 rd:5:respawn:/usr/bin/run_dialog < /dev/tty5 > /dev/tty5 2>/dev/tty5

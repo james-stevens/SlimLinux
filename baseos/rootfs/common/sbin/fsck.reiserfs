@@ -1,7 +1,16 @@
-#! /bin/sh
+#! /sbin/python
 #
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
-dev=$(findfs $2)
-exec reiserfsck -ap -y ${dev}
+from subprocess import Popen, PIPE
+import sys, os
+
+p = Popen(["/sbin/findfs",sys.argv[2]], stdout=PIPE)
+x = p.stdout.readline()
+p.wait()
+
+x = str(x, 'utf-8', 'ignore').strip()
+print("fsck.reiserfs:",sys.argv[2],"is",x)
+
+os.execl("/sbin/reiserfsck","/sbin/reiserfsck","-ap","-y",x)

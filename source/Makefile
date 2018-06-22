@@ -1,7 +1,7 @@
 
 INSTALL_CMD=install -vC
 
-TARGETS=all_addrs regexp switch_screen
+TARGETS=all_addrs regexp switch_screen pre_init
 
 CC=gcc -Wall -O2
 

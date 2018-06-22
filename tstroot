@@ -1,4 +1,8 @@
 #! /bin/bash
+#
+# (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
+# see License.txt for details
+
 
 uid=$(id -u)
 if ! test "${uid}" = "0"
@@ -18,7 +22,7 @@ mount -o noexec -t sysfs sys ROOT/sys
 mount -t tmpfs -o noexec,size=3M ram ROOT/ram
 mount -t tmpfs -o noexec,size=3M ram ROOT/opt/config
 mount -t tmpfs -o noexec,size=3M ram ROOT/opt/data
-mkdir ROOT/ram/run ROOT/ram/tmp ROOT/ram/root ROOT/ram/db
+mkdir ROOT/ram/run ROOT/ram/tmp ROOT/ram/root ROOT/ram/db ROOT/ram/etc ROOT/ram/home
 chmod 700 ROOT/ram/root
 chown 0:0 ROOT/ram/tmp ROOT/ram/run ROOT/ram/root
 chmod 777 ROOT/ram/tmp ROOT/ram/run
@@ -26,9 +30,12 @@ chmod +t ROOT/ram/tmp ROOT/ram/run
 
 cat ROOT/etc/base_config/* > ROOT/opt/config/system.cfg
 
+export PYTHONPATH=/usr/python
+export TZ=":/etc/localtime"
+
 chroot ROOT ldconfig
-chroot ROOT /usr/scripts/make_shadow
-chroot ROOT /etc/rc.d/boot.d/20_roothome
+chroot ROOT /sbin/python -m make_shadow
+chroot ROOT /usr/python/boot_d/20_roothome.py
 export HOME="/ram/root"
 chroot ROOT /bin/sh -li
 
