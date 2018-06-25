@@ -3,16 +3,6 @@
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
-
-if ls -l /proc/[0-9]*/root | grep -q 'SlimLinux/ROOT'
-	then
-		echo "================================================"
-		echo "ERROR: Somebody is using the 'tstroot' service"
-		echo "       They must quite before running this again"
-		echo "================================================"
-		exit 0
-	fi
-
 parent="$PWD"
 
 baseos="${parent}/baseos"
@@ -47,6 +37,16 @@ if test "$1" = "-u"
 	then
 		with_sudo="Y"
 		shift
+	fi
+
+
+if ls -l /proc/[0-9]*/root | grep -q 'SlimLinux/ROOT'
+	then
+		echo "================================================"
+		echo "ERROR: Somebody is using the 'tstroot' service"
+		echo "       They must quite before running this again"
+		echo "================================================"
+		exit 0
 	fi
 
 isobase=${parent}/iso
