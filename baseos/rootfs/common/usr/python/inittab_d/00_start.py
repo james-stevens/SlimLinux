@@ -27,9 +27,9 @@ def fn_00_start():
 		print ("c3:12345:respawn:/sbin/getty 38400 tty3 linux")
 		print ("c4:12345:respawn:/sbin/getty 38400 tty4 linux")
 
-	print ("X5:12345:respawn:/sbin/sh < /dev/tty5 > /dev/tty5 2>&1")
-	print ("X6:12345:respawn:/sbin/sh < /dev/tty6 > /dev/tty6 2>&1")
-	print ("X7:12345:respawn:/sbin/sh < /dev/tty7 > /dev/tty7 2>&1")
+	# print ("X5:12345:respawn:/sbin/sh < /dev/tty5 > /dev/tty5 2>&1")
+	# print ("X6:12345:respawn:/sbin/sh < /dev/tty6 > /dev/tty6 2>&1")
+	# print ("X7:12345:respawn:/sbin/sh < /dev/tty7 > /dev/tty7 2>&1")
 
 	print ("")
 
