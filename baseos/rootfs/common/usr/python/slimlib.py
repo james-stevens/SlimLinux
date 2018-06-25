@@ -77,3 +77,9 @@ def capture_entropy():
 
 def opt_is_y(tag):
 	return tag in __opts__.opt_vals and __opts__.opt_vals[tag]=="Y"
+
+def remove(path):
+	try:
+		os.remove(path)
+	except:
+		pass

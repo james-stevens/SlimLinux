@@ -39,7 +39,7 @@ for user in __opts__.opt_users:
 		uid=uids;
 		uids += 1
 
-	colon=user.index(":")
+	colon=user.find(":")
 	gid=100
 	grp="users"
 

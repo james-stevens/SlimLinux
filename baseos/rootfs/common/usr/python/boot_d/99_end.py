@@ -6,8 +6,3 @@
 import __opts__,opts, slimlib
 
 print ("BOOT: 99_end")
-
-if slimlib.opt_is_y("allowConsoleLogin"):
-	print("--------------- Press Atl-F2 to Login  ---------------")
-else:
-	print("------------------ Boot Complete ---------------------")

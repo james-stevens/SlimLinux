@@ -199,13 +199,10 @@ function fix_os_perms()
 	find . -type d -exec chmod 755 {} ';'
 
 	dirs=""
-	maybe="usr/lib64/security lib64 etc/rc.d sbin usr/sbin usr/bin usr/lib64/xtables usr/scripts etc/acpi"
+	maybe="usr/lib64/security lib64 etc/rc.d sbin usr/sbin usr/bin usr/lib64/xtables etc/acpi opt/python/bin"
 	for d in ${maybe}
 		do
-			if test -d usr/lib64/security
-				then
-					dirs="${dirs} ${d}"
-				fi
+			if test -d "${d}"; then dirs="${dirs} ${d}"; fi
 		done
 
 	find ${dirs} -type f -exec chmod 555 {} ';'
@@ -346,6 +343,7 @@ if ! test -f ${rootfs}
 			done
 
 		if test "${overlays}"; then add_overlays; fi
+		chroot ${rootdir} /sbin/ldconfig
 
 		cd ${parent}
 		du -sh ${rootdir}
@@ -364,6 +362,7 @@ if ! test -f ${rootfs}
 					then
 						rm -f $(find ${d} -type f -name '*.pyc')
 						chroot ${rootdir} /sbin/python -m compileall /${dir} > /dev/null
+						find ${d} -type f -exec chmod 555 {} ';'
 					fi
 			done
 

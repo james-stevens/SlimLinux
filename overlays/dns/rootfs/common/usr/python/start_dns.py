@@ -8,10 +8,7 @@ import __opts__,opts, slimlib
 
 
 def make_dev(path,major,minor):
-	try:
-		os.remove(path)
-	except:
-		pass
+	slimlib.remove(path)
 	os.mknod(path,stat.S_IFCHR,device=os.makedev(major,minor))
 	os.chmod(path,0o666)
 
@@ -45,7 +42,7 @@ if slimlib.opt_is_y("dnsWithAS112"):
 conf="/etc/dns.conf"
 path=dnsbase+conf
 if os.path.isfile("/opt/config/dns.conf"):
-	if os.path.isfile(path): os.remove(path)
+	slimlib.remove(path)
 	shutil.copy2("opt/config/dns.conf",path)
 	os.chmod(path,0o600)
 	shutil.chown(path,"nobody","nobody")

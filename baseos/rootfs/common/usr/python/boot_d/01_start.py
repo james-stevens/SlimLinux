@@ -93,8 +93,8 @@ p.stdin.close()
 p.wait()
 
 
-if "binary" in __opts__.opt_vals:
-	desc=__opts__.opt_vals["binary"]+": "
+if "baseos" in __opts__.opt_vals:
+	desc=__opts__.opt_vals["baseos"]+": "
 	if "overlays" in __opts__.opt_vals:
 		desc=desc+__opts__.opt_vals["overlays"]
 else:

@@ -7,7 +7,7 @@
 # https://tools.ietf.org/html/rfc7534
 
 import __opts__,opts, slimlib, syslog
-import tempfile, subprocess, os, shutil
+import tempfile, subprocess, os, shutil, random
 
 
 def make_dns_conf():
@@ -239,10 +239,13 @@ def make_dns_conf():
 	conf="/etc/dns.conf"
 	dst=dnsbase+conf
 	os.makedirs(dnsbase+"/etc",exist_ok=True)
-	shutil.chown(tname,"nobody","nobody")
-	os.chmod(tname,0o400)
-	os.rename(tname,dst)
 
+	tmp=dnsbase+conf+"_"+str(os.getpid())+"_"+str(random.randint(1,100000))
+	shutil.copy2(tname,tmp)
+	slimlib.remove(tname)
+	shutil.chown(tmp,"nobody","nobody")
+	os.chmod(tmp,0o400)
+	os.rename(tmp,dst)
 
 	if not subprocess.run(["/sbin/named-checkconf","-t",dnsbase,conf]).returncode == 0:
 		syslog.syslog("ERROR: \""+conf+"\" failed validation checks")

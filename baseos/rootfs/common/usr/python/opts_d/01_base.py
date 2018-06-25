@@ -24,10 +24,10 @@ def fn_01_base():
 				else:
 					__opts__.opt_vals[tag] = val
 
-		if not "serverHostname" in __opts__.opt_vals:
-			__opts__.opt_vals["serverHostname"]="slimlinux.exmaple.com"
+	if not "serverHostname" in __opts__.opt_vals:
+		__opts__.opt_vals["serverHostname"]="slimlinux.example.com"
 
-		if not "staticResolvers" in __opts__.opt_vals:
-			__opts__.opt_vals["staticResolvers"]="8.8.8.8 8.8.4.4 208.67.220.220 208.67.222.222"
+	if not "staticResolvers" in __opts__.opt_vals:
+		__opts__.opt_vals["staticResolvers"]="8.8.8.8 8.8.4.4 208.67.220.220 208.67.222.222"
 
 __opts__.opt_fns.append(fn_01_base)

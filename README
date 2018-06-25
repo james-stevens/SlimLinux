@@ -5,7 +5,14 @@ SlimLinux - A Micro-Linux for building IoT & Embedded Applications
 SlimLinux is a Linux server development kit for the purpose of
 developing small lightweight, secure Linux based network-aware 
 embedded applications – both physical & virtual. The base 
-installation takes 16Mb of disk space and uses 18.5Mb of RAM to run.
+installation takes 23.3Mb of disk space and uses 18.5Mb of RAM to run.
+
+Apart from being very small, SlimLinux's other interesting feature is 
+that is uses no shell-script whatsoever. The control scripts are 
+entirely written in Python. Although it carries a full implementation 
+of the Python binary itself, it does not carry a full installation of all 
+Python modules. Using Python adds about 6.5Mb, compared to using 
+shell-script control.
 
 An “embedded application” means any Linux system that is intended 
 to run “headless” (no standard UI) with almost exclusively

@@ -5,6 +5,8 @@
 
 import __opts__,opts, slimlib
 
+print("BOOT: 40_dns")
+
 if slimlib.opt_is_y("dnsResolver"):
 	with open("/ram/etc/resolv.conf","w") as fd:
 		print("nameserver 127.0.0.1",file=fd)

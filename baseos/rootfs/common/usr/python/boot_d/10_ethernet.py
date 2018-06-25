@@ -4,14 +4,14 @@
 # see License.txt for details
 
 import os, subprocess
-import __opts__,opts
+import __opts__,opts, slimlib
 
 print ("BOOT: 10_ethernet")
 
 subprocess.run(["/sbin/ip","link","set","eth0","up"])
 
 dst="/ram/addrs"
-if os.path.isfile(dst): os.unlink(dst)
+slimlib.remove(dst)
 
 max_mask = { "4":32, "6": 128 }
 with open(__opts__.syscfg,"r") as sysfd:
@@ -50,7 +50,7 @@ with open("/ram/etc/resolv.conf","w") as fd:
 with open("/ram/etc/hosts","w") as fd:
 	print("127.0.0.1 localhost",file=fd)
 	if "static4IP" in __opts__.opt_vals:
-		print(__opts__.opt_vals["static4IP"],__opts__.opt_vals["serverHostname"],file=id)
+		print(__opts__.opt_vals["static4IP"],__opts__.opt_vals["serverHostname"],file=fd)
 
 with open(__opts__.syscfg,"r") as sysfd:
 	lines = [ l[12:].strip().strip('"').strip("'") for l in sysfd if l.startswith("staticRoute=") ]

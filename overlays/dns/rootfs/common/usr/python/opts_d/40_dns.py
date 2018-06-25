@@ -14,8 +14,8 @@ def fn_40_dns():
 
 	dnsbase="/ram/dns"
 	if  (   slimlib.opt_is_y("dnsLogging")
-		and slimlib.opt_is_y("dnsWithSecondary")
-		and slimlib.opt_is_y("dnsWithPrimary")
+		or slimlib.opt_is_y("dnsWithSecondary")
+		or slimlib.opt_is_y("dnsWithPrimary")
 		):
 		dnsbase="/opt/data/dns"
 

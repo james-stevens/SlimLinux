@@ -3,7 +3,7 @@
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
-import __firewall__
+import __firewall__, slimlib
 from firewall_d import *
 import os, sys, tempfile, filecmp, subprocess
 
@@ -25,7 +25,7 @@ def make_firewall():
 		with open(dst,"r") as fd:
 			if subprocess.run(["/sbin/"+cmd+"-restore"],stdin=fd):
 				bz=dst+".bz2"
-				if os.path.isfile(bz): os.unlink(bz)
+				slimlib.remove(bz)
 				subprocess.run(["/sbin/bzip2",dst])
 
 	sys.stdout = save_out

@@ -51,4 +51,6 @@ int main(int argc,char * argv[])
 	if (getpid()==1) do_set_env();
 	char * dst = "/usr/sbin/init";
 	if (execv(dst,argv)) fprintf(stderr,"ERROR: exec '%s' failed - %s\n",dst,strerror(errno));
+
+	return 0;
 }

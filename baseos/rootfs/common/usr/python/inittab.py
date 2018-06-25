@@ -4,7 +4,7 @@
 # see License.txt for details
 
 import os, sys, filecmp, tempfile, signal
-import __inittab__
+import __inittab__, slimlib
 from inittab_d import *
 
 
@@ -21,4 +21,4 @@ def make_inittab():
 		os.rename(tname,dst)
 		os.kill(1,signal.SIGHUP)
 
-	if os.path.isfile(tname): os.unlink(tname)
+	slimlib.remove(tname)

@@ -37,7 +37,7 @@ if not os.path.isdir("/opt/config/ssh/sshd_config"):
 
 	os.chmod(tname,stat.S_IRUSR)
 	os.rename(tname,"/ram/ssh/sshd_config")
-	if os.path.isfile(tname): os.unlink(tname)
+	slimlib.remove(tname)
 
 
 os.execl("/usr/sbin/sshd","/usr/sbin/sshd","-D")
