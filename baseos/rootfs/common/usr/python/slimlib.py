@@ -19,8 +19,11 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,
 	else:
 		ignored_names = set()
 
-	# ==> next line changed from just "os.makedirs(dst)"
-	if not os.path.isdir(dst): os.makedirs(dst)
+	###########################################
+	# ==> next line added "exist_ok=True" <== #
+	###########################################
+	os.makedirs(dst,exist_ok=True)
+
 	errors = []
 	for name in names:
 		if name in ignored_names:

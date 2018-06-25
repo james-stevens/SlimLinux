@@ -3,10 +3,10 @@
 # (c) Copyright 2017-2018 James Stevens (james@jrcs.net) - All Rights Reserved
 # see License.txt for details
 
-import string, os, stat, subprocess, shutil, glob, tempfile
+import os, stat, subprocess, tempfile
 import __opts__,opts,slimlib
 
-if not os.path.isdir("/ram/ssh"): os.makedirs("/ram/ssh")
+os.makedirs("/ram/ssh",exist_ok=True)
 
 with open("/ram/ssh/moduli","w") as fd:
 	subprocess.run(["/sbin/xz","-dc","/etc/moduli.xz"],stdout=fd)
@@ -18,7 +18,7 @@ if os.path.isdir(store):
 	slimlib.copytree(store,"/ram/ssh")
 else:
 	subprocess.run(["/sbin/ssh-keygen","-A"])
-	os.mkdir(store)
+	os.makedirs(store,exist_ok=True)
 	slimlib.copytree("/ram/ssh",store)
 
 

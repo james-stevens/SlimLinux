@@ -13,7 +13,7 @@ subprocess.run(["/sbin/dmesg","-n","5"])
 subprocess.run(["/sbin/mount","-o","noexec","-t","proc","/proc","/proc"])
 subprocess.run(["/sbin/mount","-o","noexec","-t","sysfs","/sys","/sys"])
 
-if not os.path.isdir("/dev/pts"): os.mkdir("/dev/pts")
+os.makedirs("/dev/pts",exist_ok=True)
 subprocess.run(["/sbin/mount","-o","noexec","-t","devpts","/dev/pts","/dev/pts"])
 
 subprocess.run(["/sbin/fsck","-A","-y"])
@@ -49,7 +49,7 @@ if os.path.isfile(rnd):
 			rfd.write(data)
 
 for dir in ["ssh","root","tmp","etc","var","var/run","var/db","var/lib"]: 
-	os.mkdir("/ram/"+dir)
+	os.makedirs("/ram/"+dir,exist_ok=True)
 
 os.chmod("/ram/tmp",0o777+stat.S_ISVTX)
 os.chmod("/ram/var/run",0o777+stat.S_ISVTX)

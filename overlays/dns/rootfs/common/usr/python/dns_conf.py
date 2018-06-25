@@ -201,7 +201,7 @@ def make_dns_conf():
 
 
 	if slimlib.opt_is_y("dnsWithSecondary"):
-		if not os.path.isdir(dnsbase+"/slave"): os.mkdir(dnsbase+"/slave")
+		os.makedirs(dnsbase+"/slave",exist_ok=True)
 
 		shutil.chown(dnsbase+"/slave","nobody","nobody")
 
@@ -219,7 +219,7 @@ def make_dns_conf():
 
 
 	if slimlib.opt_is_y("dnsWithPrimary"):
-		if not os.path.isdir(dnsbase+"/master"): os.mkdir(dnsbase+"/master")
+		os.makedirs(dnsbase+"/master",exist_ok=True)
 
 		shutil.chown(dnsbase+"/slave","nobody","nobody")
 

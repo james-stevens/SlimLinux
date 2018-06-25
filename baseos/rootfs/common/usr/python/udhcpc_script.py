@@ -38,11 +38,11 @@ def do_dhcpc():
 			print("127.0.0.1 localhost",file=fd)
 			print(os.environ["ip"],__opts__.opt_vals["serverHostname"],file=fd)
 
+		import firewall
+		firewall.make_firewall()
+
 		with open("/dev/console","w") as fd:
 			print("IP Address:",os.environ["ip"]+"/"+os.environ["subnet"],"gw",os.environ["router"],file=fd)
-
-		import firewall
-		make_firewall()
 
 		subprocess.run(["/sbin/init","5"])
 		return

@@ -11,7 +11,7 @@ def user(user,u,g):
 	for x in ["/"+user,"/.ssh"]:
 		dst=dst+x
 		if not os.path.isdir(dst): 
-			os.mkdir(dst)
+			os.makedirs(dst,exist_ok=True)
 			os.chown(dst,u,g)
 
 	dst=dst+"/authorized_keys"
@@ -29,7 +29,7 @@ def user(user,u,g):
 
 def root():
 	dst="/ram/root/.ssh"
-	if not os.path.isdir(dst): os.mkdir(dst)
+	os.makedirs(dst,exist_ok=True)
 	dst=dst+"/authorized_keys"
 
 	kfd=open(dst,"w")
