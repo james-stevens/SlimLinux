@@ -20,6 +20,7 @@ iso/isolinux/initrd.img
 iso/isolinux/kernel
 iso/chk.md5
 source/all_addrs
+source/pre_init
 source/regexp
 source/switch_screen
 iso/install.cfg
