@@ -32,7 +32,7 @@ def do_dhcpc():
 				print(os.environ["interface"] + "_" + p + "=" + os.environ[p],file=fd)
 
 		with open("/ram/addrs","w") as fd:
-			print("4",os.environ["ip"]+"/"+os.environ["subnet"],file=fd)
+			print("4",os.environ["ip"]+"/"+os.environ["subnet"],os.environ["ip"],os.environ["subnet"],file=fd)
 
 		with open("/ram/etc/hosts","w") as fd:
 			print("127.0.0.1 localhost",file=fd)

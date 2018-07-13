@@ -35,13 +35,13 @@ if test ! -d baseos/rootfs
 
 cd ${base}/rootfs
 
-binary="UNKNOWN"
-while ! test -d "${binary}"
+baseos="UNKNOWN"
+while ! test -d "${baseos}"
 	do
-		echo "Select one binary base"; echo ""
+		echo "Select one baseos base"; echo ""
 		find * -mindepth 0 -maxdepth 0 -type d -not -name common
 		echo ""; echo -n "Binary Base: "
-		read binary
+		read baseos
 	done
 
 
@@ -70,7 +70,7 @@ while test "${overlays}" = "NONE"
 {
 echo "# SlimLinux mkiso.cfg"
 echo ""
-echo "binary=\"${binary}\""
+echo "baseos=\"${baseos}\""
 echo "overlays=\"${overlays}\""
 } > ${cfg}
 

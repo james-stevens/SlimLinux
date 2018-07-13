@@ -5,7 +5,7 @@
 
 parent="$PWD"
 
-baseos="${parent}/baseos"
+basedir="${parent}/baseos"
 cfg=${parent}/mkiso.cfg
 output="${parent}/output"
 mkdir -p ${output}
@@ -21,7 +21,7 @@ if ! test "${uid}" = "0"
         sudo ./mkiso -u $*
 
 		. ${cfg}
-		isofile="${binary}.iso"
+		isofile="${baseos}.iso"
 		iso="${output}/${isofile}"
 		liveiso="${output}/${isofile}"
 		if test "${upload_ip}" -a "${upload_dir}" -a -f "${iso}"
@@ -106,10 +106,10 @@ if ! test -f ${cfg}; then sh configure; fi
 
 . ${cfg}
 
-if ! test -d baseos/rootfs/common -a -d baseos/rootfs/${binary}
+if ! test -d baseos/rootfs/common -a -d baseos/rootfs/${baseos}
 	then
 		echo "ERROR: base O/S failure"
-		ls -l baseos/rootfs/common -a -d baseos/rootfs/${binary}
+		ls -l baseos/rootfs/common -a -d baseos/rootfs/${baseos}
 		exit 0
 	fi
 
@@ -124,7 +124,7 @@ for ovr in ${overlays}
 	done
 
 
-isofile="${binary}.iso"
+isofile="${baseos}.iso"
 iso="${output}/${isofile}"
 
 rm -f ${iso}
@@ -141,7 +141,7 @@ if ! test -f ${initrd}
 		mkdir ${output}/install_os.dd_mnt
 		mount -o loop ${output}/install_os.dd ${output}/install_os.dd_mnt
 
-		cd ${baseos}/rootfs
+		cd ${basedir}/rootfs
 		tar -cf - -T ${parent}/build_files/common.lst | (cd ${output}/install_os.dd_mnt ; tar --strip 1 -xf -)
 
 		cd ${parent}/install_os
@@ -237,7 +237,7 @@ function add_depends()
 			for x in ${depends}
 				do
 					add_depends $x common
-					add_depends $x ${binary}
+					add_depends $x ${baseos}
 				done
 		fi
 }
@@ -249,7 +249,7 @@ function capture_overlays()
 	for ovr in ${overlays}
 		do
 			add_depends ${ovr} common
-			add_depends ${ovr} ${binary}
+			add_depends ${ovr} ${baseos}
 		done
 
 	overlays=$(awk 'BEGIN { 
@@ -295,7 +295,7 @@ function add_overlays()
 				cd ${d}; cp -a . ${parent}/CONFIG
 			fi
 
-		for dir in common ${binary}
+		for dir in common ${baseos}
 			do
 			d="${parent}/overlays/${ovr}/rootfs/${dir}"
 			if test -d "${d}"
@@ -333,12 +333,12 @@ if ! test -f ${rootfs}
 		rm -f ${rootfs} ${configfs} ${datafs}
 
 		mkdir ${rootdir}
-		cd ${baseos}/rootfs
+		cd ${basedir}/rootfs
 
-		for dir in common ${binary}
+		for dir in common ${baseos}
 			do
 				echo "- Adding base O/S code: ${dir}"
-				cd ${baseos}/rootfs/${dir}
+				cd ${basedir}/rootfs/${dir}
 				cp -a . ${rootdir}
 			done
 
@@ -404,7 +404,7 @@ if ! test -d ${isobase}/random
 echo "Making ISO / USB image"
 
 {
-echo "baseos=\"${binary}\""
+echo "baseos=\"${baseos}\""
 echo "overlays=\"${overlays}\""
 } > ${isobase}/install.cfg
 
@@ -457,7 +457,7 @@ if test "${remade_rootfs}" = "Y"
 		rm -f ${isobase}/config.tgz ${isobase}/rootfs.txz
 
 		rootdir="${parent}/ROOT"
-		isofile="live_${binary}.iso"
+		isofile="live_${baseos}.iso"
 		iso="${output}/${isofile}"
 
 		if ! test -d "${rootdir}"

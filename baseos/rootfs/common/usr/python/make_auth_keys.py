@@ -30,6 +30,7 @@ def user(user,u,g):
 def root():
 	dst="/ram/root/.ssh"
 	os.makedirs(dst,exist_ok=True)
+	os.chmod(dst,0o700)
 	dst=dst+"/authorized_keys"
 
 	kfd=open(dst,"w")

@@ -29,4 +29,4 @@ view   sysView included    .1.3.6.1.2.1.2.2.1
 access  worldGroup  \"\"  any  noauth  exact   sysView  none   none""",file=fd)
 
 
-os.execl("/usr/sbin/snmpd","/usr/sbin/snmpd","/usr/sbin/snmpd","-u","nobody","-r","-f","-c","/ram/etc/snmpd.conf")
+os.execl("/usr/sbin/snmpd","/usr/sbin/snmpd","-u","nobody","-r","-f","-c","/ram/etc/snmpd.conf")
