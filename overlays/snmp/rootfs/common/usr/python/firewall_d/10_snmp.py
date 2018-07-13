@@ -14,4 +14,3 @@ if slimlib.opt_is_y("runningSnmpd"):
 		for all in slimlib.by_addr_type(src):
 			print("-A INPUT -p udp -m udp -s "+all+" --dport 161 -j ACCEPT")
 			print("-A OUTPUT -p udp -m udp -d "+all+" --sport 161 -j ACCEPT")
-	fi
