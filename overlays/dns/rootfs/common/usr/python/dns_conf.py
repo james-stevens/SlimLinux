@@ -75,7 +75,7 @@ def make_dns_conf():
 
 		 directory "/var/dns";
 		 allow-update { none; };
-		 allow-transfer { none; };
+		 allow-transfer { 127.0.0.0/8; };
 		 notify no;
 		 max-udp-size 4096;
 		 edns-udp-size 4096;
@@ -231,7 +231,7 @@ def make_dns_conf():
 				tfd.write("zone \""+a[0]+"\"  { type master; notify explicit; file \"/slave/"+file+"\";\n\tmasters {")
 				del a[0]
 				iplist = [ l.strip() for l in a if l.find("/") < 0 ]
-				tfd.write("\tallow-transfer { "+"; ".join(a)+"; };\n")
+				tfd.write("\tallow-transfer { "+"; ".join(a)+"; 127.0.0.0/8; };\n")
 				tfd.write("\talso-notify { "+"; ".join(iplist)+"; };\n")
 				print("\t};\n",file=tfd)
 
