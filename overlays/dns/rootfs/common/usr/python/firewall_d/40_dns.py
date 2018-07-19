@@ -34,6 +34,17 @@ def fn_40_dns(ipv):
 			print("-A OUTPUT -p tcp --sport 953 -j ACCEPT")
 
 
+	if slimlib.opt_is_y("dnsWithSecondary"):
+		with open(__opts__.syscfg,"r") as sysfd:
+			lines = [ l.strip()[14:].strip('"').strip("'") for l in sysfd if l.startswith("dnsSecondary=") ]
+			for l in lines:
+				if l.find(" ") < 0: continue
+				l = l[l.find(" "):]
+				while l[0]==" ": l=l[1:]
+				for all in slimlib.by_addr_type(l,ipv):
+					print("-A UDPDNS -s",all," -j ACCEPT")
+
+
 	loc="1b"
 	if ipv == "6": loc="3d"
 

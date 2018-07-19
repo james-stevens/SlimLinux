@@ -31,7 +31,7 @@ def do_dhcpc():
 			for p in params:
 				print(os.environ["interface"] + "_" + p + "=" + os.environ[p],file=fd)
 
-		with open("/ram/addrs","w") as fd:
+		with open("/ram/addrs","a") as fd:
 			print("4",os.environ["ip"]+"/"+os.environ["subnet"],os.environ["ip"],os.environ["subnet"],file=fd)
 
 		with open("/ram/etc/hosts","w") as fd:
