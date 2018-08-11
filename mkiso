@@ -106,7 +106,7 @@ if ! test -f ${cfg}; then sh configure; fi
 
 . ${cfg}
 
-if ! test -d baseos/rootfs/common -a -d baseos/rootfs/${baseos}
+if ! test "${baseos}" -a -d baseos/rootfs/common -a -d baseos/rootfs/${baseos}
 	then
 		echo "ERROR: base O/S failure"
 		ls -l baseos/rootfs/common -a -d baseos/rootfs/${baseos}
